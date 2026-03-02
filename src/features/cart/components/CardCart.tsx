@@ -3,7 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../hooks/useCart";
-import { useFormatPrice } from "../hooks/useFormatPrice";
+import { useFormatPrice } from "../../category/hooks/useFormatPrice";
 import { ColorGlobal } from "@/src/global/colorGlobal";
 
 export const CardCart: React.FC = () => {

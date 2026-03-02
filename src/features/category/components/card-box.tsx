@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFormatPrice } from "../hooks/useFormatPrice";
-import { useCart } from "../hooks/useCart";
+import { useCart } from "../../cart/hooks/useCart";
 import { Product, Variant } from "../types/products";
 import { Addition } from "../types/addition";
 import { ColorGlobal } from "@/src/global/colorGlobal";

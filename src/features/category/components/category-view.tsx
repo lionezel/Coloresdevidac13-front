@@ -7,7 +7,7 @@ import { useProducts } from "../hooks/useProducts";
 import { useAdditions } from "../hooks/useAdditions";
 import { useLoading } from "../../home/hooks/useLoading";
 import { useFormatPrice } from "../hooks/useFormatPrice";
-import { useCart } from "../hooks/useCart";
+import { useCart } from "../../cart/hooks/useCart";
 
 import { CartIconWithBadge } from "../../home/components/CartIconWithBadge";
 import { BackgroundColor, ColorGlobal } from "../../../global/colorGlobal";

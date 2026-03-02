@@ -3,9 +3,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { CardCart } from "@/src/features/category/components/CardCart";
-import { CartSummary } from "@/src/features/category/components/CartSummary";
-import { useCart } from "@/src/features/category/hooks/useCart";
+import { CardCart } from "@/src/features/cart/components/CardCart";
+import CheckoutSummary from "@/src/features/cart/components/CheckoutSummary";
+import { useCart } from "@/src/features/cart/hooks/useCart";
 import { ColorGlobal } from "@/src/global/colorGlobal";
 
 export default function CartPage() {
@@ -71,7 +71,7 @@ export default function CartPage() {
                             transition={{ delay: 0.2 }}
                             className="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] sticky top-8"
                         >
-                            <CartSummary />
+                            <CheckoutSummary />
                         </motion.div>
                     )}
                 </div>

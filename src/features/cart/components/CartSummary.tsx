@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useCart } from "../hooks/useCart";
-import { useFormatPrice } from "../hooks/useFormatPrice";
+import { useFormatPrice } from "../../category/hooks/useFormatPrice";
 import { ColorGlobal } from "@/src/global/colorGlobal";
 
 export const CartSummary: React.FC = () => {
