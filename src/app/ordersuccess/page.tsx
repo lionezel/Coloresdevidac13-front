@@ -4,9 +4,24 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ColorGlobal } from "@/src/global/colorGlobal";
+import { sendToKitchen } from "@/src/features/comanda/services/printService";
 
 export default function OrderSuccessPage() {
     const router = useRouter();
+
+    const handlePrint = async () => {
+
+        await sendToKitchen({
+            mesa: 5,
+            mesera: "Laura",
+            items: [
+                { name: "Hamburguesa", qty: 1 },
+                { name: "Papas", qty: 2 },
+                { name: "Coca Cola", qty: 1 }
+            ]
+        })
+
+    }
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
@@ -52,10 +67,10 @@ export default function OrderSuccessPage() {
             </motion.p>
 
             <motion.button
+                onClick={handlePrint}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                onClick={() => router.push("/")}
                 className="px-10 py-4 rounded-2xl text-white font-bold text-lg shadow-lg active:scale-95 transition-all"
                 style={{ backgroundColor: ColorGlobal, boxShadow: `0 10px 20px ${ColorGlobal}4D` }}
             >
