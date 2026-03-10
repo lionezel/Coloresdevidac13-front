@@ -60,8 +60,7 @@ stages:
               kubernetesServiceConnection: $(K8S)
               namespace: $(ns)
               manifests: |
-                $(Pipeline.Workspace)/manifests/secret.yml
-                $(Pipeline.Workspace)/manifests/deploy.yml
+                $(Pipeline.Workspace)/manifests/deploy.yaml
               containers: |
                  acrpriori.azurecr.io/$(Build.Repository.Name):$(tag)
               imagePullSecrets: |
