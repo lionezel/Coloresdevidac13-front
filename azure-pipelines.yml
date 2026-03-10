@@ -19,7 +19,7 @@ stages:
       inputs:
         command: buildAndPush
         repository: $(Build.Repository.Name)
-        dockerfile: $(Build.SourcesDirectory)
+        dockerfile: $(Build.SourcesDirectory)/Dockerfile
         containerRegistry: $(registry)
         tags: |
           $(Build.BuildId)
