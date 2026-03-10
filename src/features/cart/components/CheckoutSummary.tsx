@@ -14,7 +14,7 @@ import {
 import React, { useMemo, useState } from "react";
 
 export default function CheckoutSummary() {
-    const { cart, loading } = useCart();
+    const { cart, loading, clearCart } = useCart();
     const { formatPrice } = useFormatPrice();
     const router = useRouter();
 
@@ -96,18 +96,25 @@ export default function CheckoutSummary() {
                 total,
             });
 
+            const orderData = {
+                name,
+                paymentMethod,
+                notes: orderNotes,
+                products: safeProducts,
+                total,
+                date: new Date().toISOString(), // Using ISO string for easier storage
+            };
+
             await addDoc(
                 collection(db, "restaurants", RestaurantId, "orders"),
                 {
-                    name,
-                    paymentMethod,
-                    notes: orderNotes,
-                    products: safeProducts,
-                    total,
+                    ...orderData,
                     date: serverTimestamp(),
                 }
             );
 
+            sessionStorage.setItem("lastOrder", JSON.stringify(orderData));
+            await clearCart();
             router.push("/ordersuccess");
         } catch (error) {
             console.error("Error creando orden:", error);
@@ -154,7 +161,8 @@ export default function CheckoutSummary() {
                     </label>
                     <input
                         type="text"
-                        className="w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#eb3d06]"
+                        className={`w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2`}
+                        style={{ '--tw-ring-color': ColorGlobal } as any}
                         placeholder="Escribe tu nombre"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -205,7 +213,8 @@ export default function CheckoutSummary() {
                         Notas del pedido:
                     </label>
                     <textarea
-                        className="w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#eb3d06] min-h-[120px] resize-none"
+                        className="w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2 min-h-[120px] resize-none"
+                        style={{ '--tw-ring-color': ColorGlobal } as any}
                         placeholder="Ej: Sin cebolla, recoger a las 8pm..."
                         value={orderNotes}
                         onChange={(e) => setOrderNotes(e.target.value)}

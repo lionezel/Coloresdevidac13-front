@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ColorGlobal } from "@/src/global/colorGlobal";
@@ -10,17 +9,20 @@ export default function OrderSuccessPage() {
     const router = useRouter();
 
     const handlePrint = async () => {
+        try {
+            const lastOrderStr = sessionStorage.getItem("lastOrder");
+            if (!lastOrderStr) return alert("No se encontró información de la última orden.");
 
-        await sendToKitchen({
-            mesa: 5,
-            mesera: "Laura",
-            items: [
-                { name: "Hamburguesa", qty: 1 },
-                { name: "Papas", qty: 2 },
-                { name: "Coca Cola", qty: 1 }
-            ]
-        })
+            const lastOrder = JSON.parse(lastOrderStr);
 
+            await sendToKitchen(lastOrder);
+
+            sessionStorage.removeItem("lastOrder");
+            router.push("/");
+        } catch (error) {
+            console.error("Error al imprimir:", error);
+            alert("No se pudo enviar la comanda a la cocina.");
+        }
     }
 
     return (

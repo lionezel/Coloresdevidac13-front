@@ -6,7 +6,7 @@ import { useCategory } from "../hooks/useCategory";
 import { useLoading } from "../hooks/useLoading";
 import { CategoryCard } from "./CardCategory";
 import { CartIconWithBadge } from "./CartIconWithBadge";
-import { BackgroundColor, ColorGlobal } from "../../../global/colorGlobal";
+import { BackgroundColor, ColorGlobal, ColorCoffee } from "../../../global/colorGlobal";
 
 export default function HomeView() {
     const { category, loading } = useCategory();
@@ -36,7 +36,7 @@ export default function HomeView() {
 
                 <h1
                     className="text-5xl font-black uppercase tracking-tight font-[Ubuntu] lg:text-6xl"
-                    style={{ color: "#4b2c20" }}
+                    style={{ color: ColorCoffee }}
                 >
                     Menu
                 </h1>

@@ -10,7 +10,7 @@ import { useFormatPrice } from "../hooks/useFormatPrice";
 import { useCart } from "../../cart/hooks/useCart";
 
 import { CartIconWithBadge } from "../../home/components/CartIconWithBadge";
-import { BackgroundColor, ColorGlobal } from "../../../global/colorGlobal";
+import { BackgroundColor, ColorGlobal, ColorCoffee } from "../../../global/colorGlobal";
 import { CardBox } from "./card-box";
 
 interface CategoryViewProps {
@@ -50,7 +50,7 @@ export function CategoryView({ slug }: CategoryViewProps) {
 
                 <h1
                     className="text-4xl font-black uppercase tracking-tight font-[Ubuntu] lg:text-5xl text-center flex-1"
-                    style={{ color: "#4b2c20" }}
+                    style={{ color: ColorCoffee }}
                 >
                     {slug}
                 </h1>
@@ -89,10 +89,15 @@ export function CategoryView({ slug }: CategoryViewProps) {
                                         additions: []
                                     })}
                                 >
-                                    <p className="font-bold text-gray-800 text-lg mb-1 group-hover:text-[#eb3d06] transition-colors">
+                                    <p
+                                        className="font-bold text-gray-800 text-lg mb-1 transition-colors"
+                                        style={{ color: 'inherit' }} // Fallback
+                                        onMouseEnter={(e) => (e.currentTarget.style.color = ColorGlobal)}
+                                        onMouseLeave={(e) => (e.currentTarget.style.color = 'inherit')}
+                                    >
                                         {item.name}
                                     </p>
-                                    <p className={`text-xl font-black ${item.price < 0 ? 'text-red-500' : 'text-[#eb3d06]'}`}>
+                                    <p className={`text-xl font-black ${item.price < 0 ? 'text-red-500' : ''}`} style={{ color: item.price < 0 ? undefined : ColorGlobal }}>
                                         {item.price < 0 ? '-' : '+'} ${formatPrice(Math.abs(item.price))}
                                     </p>
                                 </motion.button>
