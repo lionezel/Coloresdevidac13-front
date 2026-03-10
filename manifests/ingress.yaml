@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tuberculosis-ingress
-  namespace: tuberculosis
+  name: restabarlabello-ingress
+  namespace: restabarlabello
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -12,41 +12,18 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - tumedico.prioritech.com.co
-    secretName: tuberculosis-ingress-tls
+    - mesera.prioritech.com.co
+    secretName: restabarlabello-ingress-tls
   rules:
-  - host: tumedico.prioritech.com.co
+  - host: mesera.prioritech.com.co
     http:
       paths:
       # NUEVA RUTA: Para todas las llamadas a la API (Basado en tus imágenes)
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: tuberculosis-backend
-            port:
-              number: 80
-      # Route for Swagger UI
-      - path: /swagger-ui
-        pathType: Prefix
-        backend:
-          service:
-            name: tuberculosis-backend
-            port:
-              number: 80
-      # Route for OpenAPI Docs (v3)
-      - path: /v3/api-docs
-        pathType: Prefix
-        backend:
-          service:
-            name: tuberculosis-backend
-            port:
-              number: 80
       # Default route for Frontend
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: tuberculosis-frontend
+            name: restabarlabello-front
             port:
               number: 80
