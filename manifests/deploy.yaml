@@ -1,37 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tuberculosis-frontend
-  namespace: tuberculosis
+  name: restabarlabello-front
+  namespace: restabarlabello
   labels:
-    app: tuberculosis-frontend
+    app: restabarlabello-front
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tuberculosis-frontend
+      app: restabarlabello-front
   template:
     metadata:
       labels:
-        app: tuberculosis-frontend
+        app: restabarlabello-front
     spec:
       containers:
-      - name: tuberculosis-frontend
-        image: acrpriori.azurecr.io/tuberculosis-frontend # Ensure correct image name!
+      - name: RestaBarLaBello-Front
+        image: acrpriori.azurecr.io/RestaBarLaBello-Front # Ensure correct image name!
         ports:
         - containerPort: 3000
-        env:
-        - name: NEXT_PUBLIC_API_URL
-          value: "http://tuberculosis-backend/api" # Internal Service URL        
-        - name: NEXT_PUBLIC_BACKEND_URL
-          value: "http://tuberculosis-backend" # Internal Service URL
-        - name: NEXTAUTH_URL
-          value: "https://tumedico.prioritech.com.co" # Updated for Ingress
-        - name: NEXTAUTH_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: tuberculosis-front-secret
-              key: NEXTAUTH_SECRET
         # resources:
         #   limits:
         #     cpu: "500m"
@@ -43,11 +31,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tuberculosis-frontend
-  namespace: tuberculosis
+  name: restabarlabello-front
+  namespace: restabarlabello
 spec:
   selector:
-    app: tuberculosis-frontend
+    app: restabarlabello-front
   ports:
   - protocol: TCP
     port: 80
