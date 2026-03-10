@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: restabarlabello-ingress
+  namespace: restabarlabello
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Optional: If you want to rewrite paths or control precedence explicitly
+    # nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - mesera.prioritech.com.co
+    secretName: restabarlabello-ingress-tls
+  rules:
+  - host: mesera.prioritech.com.co
+    http:
+      paths:
+      # NUEVA RUTA: Para todas las llamadas a la API (Basado en tus imágenes)
+      # Default route for Frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: restabarlabello-front
+            port:
+              number: 80
