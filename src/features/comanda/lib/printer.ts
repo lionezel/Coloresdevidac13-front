@@ -5,7 +5,7 @@ import { Order } from '../types/order.types'
 export const printOrder = async (order: Order) => {
     return new Promise((resolve, reject) => {
         // IP de la impresora (esto debería venir de una config)
-        const device = new Network('192.168.1.100')
+        const device = new Network('192.168.1.15')
         const printer = new escpos.Printer(device)
 
         device.open((err) => {
