@@ -22,7 +22,7 @@ stages:
         dockerfile: $(Build.SourcesDirectory)
         containerRegistry: $(registry)
         tags: |
-          $(tag)
+          $(Build.BuildId)
           latest
 
     - task: PublishPipelineArtifact@1
