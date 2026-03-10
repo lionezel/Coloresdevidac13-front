@@ -16,8 +16,8 @@ spec:
         app: restabarlabello-front
     spec:
       containers:
-      - name: RestaBarLaBello-Front
-        image: acrpriori.azurecr.io/RestaBarLaBello-Front # Ensure correct image name!
+      - name: restabarlabello-front
+        image: acrpriori.azurecr.io/restabarlabello-front # Ensure correct image name!
         ports:
         - containerPort: 3000
         # resources:
