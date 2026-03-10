@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tuberculosis-frontend
+  namespace: tuberculosis
+  labels:
+    app: tuberculosis-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tuberculosis-frontend
+  template:
+    metadata:
+      labels:
+        app: tuberculosis-frontend
+    spec:
+      containers:
+      - name: tuberculosis-frontend
+        image: acrpriori.azurecr.io/tuberculosis-frontend # Ensure correct image name!
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://tuberculosis-backend/api" # Internal Service URL        
+        - name: NEXT_PUBLIC_BACKEND_URL
+          value: "http://tuberculosis-backend" # Internal Service URL
+        - name: NEXTAUTH_URL
+          value: "https://tumedico.prioritech.com.co" # Updated for Ingress
+        - name: NEXTAUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: tuberculosis-front-secret
+              key: NEXTAUTH_SECRET
+        # resources:
+        #   limits:
+        #     cpu: "500m"
+        #     memory: "512Mi"
+        #   requests:
+        #     cpu: "250m"
+        #     memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tuberculosis-frontend
+  namespace: tuberculosis
+spec:
+  selector:
+    app: tuberculosis-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: ClusterIP
