@@ -1,19 +1,6 @@
 resources:
 - repo: self
 
-variables:
-  # Container registry service connection established in Azure Pipelines
-  dockerRegistryServiceConnection: 'ACR'
-  imageRepository: 'tuberculosis-frontend'
-  containerRegistry: 'acrpriori.azurecr.io' # Verified ACR
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
-  imagePullSecret: 'acr-secret'
-
-  # Kubernetes connection
-  kubernetesServiceConnection: 'K8S'
-  k8sNamespace: 'tuberculosis'
-
 stages:
 - stage: Build
   displayName: Build and Push stage
@@ -61,21 +48,21 @@ stages:
             displayName: Create ImagePullSecret
             inputs:
               action: createSecret
-              secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
-              kubernetesServiceConnection: $(kubernetesServiceConnection)
-              namespace: $(k8sNamespace)
+              secretName: secret
+              dockerRegistryEndpoint: $(registry)
+              kubernetesServiceConnection: $(K8S)
+              namespace: $(ns)
 
           - task: KubernetesManifest@0
             displayName: Deploy to Kubernetes cluster
             inputs:
               action: deploy
-              kubernetesServiceConnection: $(kubernetesServiceConnection)
-              namespace: $(k8sNamespace)
+              kubernetesServiceConnection: $(K8S)
+              namespace: $(ns)
               manifests: |
-                $(Pipeline.Workspace)/manifests/tuberculosis-front-secret.yaml
-                $(Pipeline.Workspace)/manifests/deployment.yaml
+                $(Pipeline.Workspace)/manifests/secret.yml
+                $(Pipeline.Workspace)/manifests/deploy.yml
               containers: |
-                $(containerRegistry)/$(imageRepository):$(tag)
+                 acrpriori.azurecr.io/$(Build.Repository.Name):$(tag)
               imagePullSecrets: |
-                $(imagePullSecret)
+                secret
