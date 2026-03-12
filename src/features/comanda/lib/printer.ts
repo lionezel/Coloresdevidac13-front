@@ -34,12 +34,6 @@ export const printOrder = async (order: Order) => {
 
                 order.products.forEach(product => {
                     printer.text(`${product.quantity} x ${product.productName}`)
-                    if (product.variantLabel) printer.text(`  (${product.variantLabel})`)
-                    if (product.additions && product.additions.length > 0) {
-                        product.additions.forEach(add => {
-                            printer.text(`   + ${add.name}`)
-                        })
-                    }
                 })
 
                 if (order.notes) {
