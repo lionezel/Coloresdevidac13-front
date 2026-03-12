@@ -4,7 +4,9 @@ import { db } from "@/src/firebase/config";
 import { BackgroundColor, ColorGlobal } from "@/src/global/colorGlobal";
 import { RestaurantId } from "@/src/global/id";
 import { useCart } from "@/src/features/cart/hooks/useCart";
+import { useCreditCustomers } from "@/src/features/cart/hooks/useCreditCustomers";
 import { useFormatPrice } from "@/src/features/category/hooks/useFormatPrice";
+import { CreditCustomer } from "@/src/features/cart/types/customer";
 import { useRouter } from "next/navigation";
 import {
     addDoc,
@@ -15,8 +17,11 @@ import React, { useMemo, useState } from "react";
 
 export default function CheckoutSummary() {
     const { cart, loading, clearCart } = useCart();
+    const { customers, loading: loadingCustomers } = useCreditCustomers();
     const { formatPrice } = useFormatPrice();
     const router = useRouter();
+
+    console.log("customers", customers);
 
     const [name, setName] = useState("");
     const [mesa, setMesa] = useState<number | null>(null);
@@ -25,6 +30,10 @@ export default function CheckoutSummary() {
         "efectivo" | "tarjeta" | "transferencia" | ""
     >("");
     const [orderNotes, setOrderNotes] = useState("");
+
+    // Credit customer selection states
+    const [selectedCustomer, setSelectedCustomer] = useState<CreditCustomer | null>(null);
+    const [showCustomerSelection, setShowCustomerSelection] = useState(false);
 
     /**
      * Totales
@@ -50,6 +59,10 @@ export default function CheckoutSummary() {
     const handleCheckout = async () => {
         if (!name.trim()) {
             return alert("Por favor ingresa tu nombre.");
+        }
+
+        if (name === "Crédito" && !selectedCustomer) {
+            return alert("Por favor selecciona un cliente para el crédito.");
         }
 
         // if (!paymentMethod) {
@@ -89,23 +102,19 @@ export default function CheckoutSummary() {
                 additions: item.additions ?? [],
             }));
 
-            console.log("ORDEN A GUARDAR:", {
-                name,
-                paymentMethod,
-                notes: orderNotes,
-                products: safeProducts,
-                total,
-            });
-
             const orderData = {
-                name,
+                name: selectedCustomer ? selectedCustomer.name : name,
                 mesa,
                 paymentMethod,
                 notes: orderNotes,
                 products: safeProducts,
                 total,
-                date: new Date().toISOString(), // Using ISO string for easier storage
+                date: new Date().toISOString(),
+                creditCustomerId: selectedCustomer?.id || null,
+                creditCustomerName: selectedCustomer?.name || null,
             };
+
+            console.log("ORDEN A GUARDAR:", orderData);
 
             await addDoc(
                 collection(db, "restaurants", RestaurantId, "orders"),
@@ -170,6 +179,8 @@ export default function CheckoutSummary() {
                                     onClick={() => {
                                         setMesa(num);
                                         setName(`Mesa ${num}`);
+                                        setSelectedCustomer(null);
+                                        setShowCustomerSelection(false);
                                     }}
                                     className={`py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${isActive
                                         ? "text-white shadow-md scale-[1.05]"
@@ -190,6 +201,7 @@ export default function CheckoutSummary() {
                         onClick={() => {
                             setMesa(null);
                             setName("Crédito");
+                            setShowCustomerSelection(!showCustomerSelection);
                         }}
                         className={`w-full py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${name === "Crédito"
                             ? "text-white shadow-md scale-[1.02]"
@@ -203,50 +215,49 @@ export default function CheckoutSummary() {
                     >
                         USUARIO CRÉDITO
                     </button>
+
+                    {/* Customer Selection Modal/List */}
+                    {showCustomerSelection && (
+                        <div className="mt-3 p-4 bg-gray-50 rounded-[15px] border border-black/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <p className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">Selecciona el cliente:</p>
+                            {loadingCustomers ? (
+                                <p className="text-sm text-gray-400">Cargando clientes...</p>
+                            ) : customers.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-1">
+                                    {customers.map((customer) => (
+                                        <button
+                                            key={customer.id}
+                                            onClick={() => {
+                                                setSelectedCustomer(customer);
+                                                setShowCustomerSelection(false);
+                                            }}
+                                            className={`py-2 px-3 rounded-[10px] text-xs font-semibold border transition-all ${selectedCustomer?.id === customer.id
+                                                ? "text-white"
+                                                : "bg-white border-black/5 text-gray-600 hover:bg-white/80"
+                                                }`}
+                                            style={{
+                                                backgroundColor: selectedCustomer?.id === customer.id ? ColorGlobal : undefined,
+                                                borderColor: selectedCustomer?.id === customer.id ? ColorGlobal : undefined,
+                                            }}
+                                        >
+                                            {customer.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-400 text-center py-2">No hay clientes registrados.</p>
+                            )}
+                        </div>
+                    )}
+
                     {name && (
                         <p className="mt-2 text-xs font-[Ubuntu]" style={{ color: ColorGlobal }}>
-                            Seleccionado: <span className="font-bold">{name}</span>
+                            Seleccionado: <span className="font-bold">
+                                {selectedCustomer ? selectedCustomer.name : name}
+                            </span>
                         </p>
                     )}
                 </div>
-
-                {/* Métodos de pago */}
-                {/* <div>
-                    <p className="text-[15px] font-semibold text-[#333] mb-4 font-[Ubuntu] tracking-wide ml-1">
-                        Método de pago:
-                    </p>
-                    <div className="flex gap-3">
-                        {[
-                            { id: "efectivo", label: "Efectivo", iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.82v-1.91c-1.57-.31-2.92-1.34-3.13-2.97h2.01c.21.73.91 1.29 1.95 1.29 1.14 0 2.05-.62 2.05-1.55 0-.85-.63-1.42-2.19-1.95-2-.69-3.53-1.5-3.53-3.08 0-1.4 1.1-2.45 2.67-2.77V5h2.82v1.9c1.39.29 2.5 1.29 2.73 2.69h-2c-.22-.68-.84-1.12-1.87-1.12-1.1 0-1.8.52-1.8 1.43 0 .82.72 1.34 2.27 1.93 2.11.81 3.47 1.69 3.47 3.2 0 1.52-1.15 2.65-2.8 2.94z" },
-                            { id: "transferencia", label: "Transfér", iconPath: "M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z" },
-                            { id: "tarjeta", label: "Tarjeta", iconPath: "M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" }
-                        ].map((method) => {
-                            const isActive = paymentMethod === method.id;
-                            return (
-                                <button
-                                    key={method.id}
-                                    onClick={() => setPaymentMethod(method.id as any)}
-                                    className={`flex-1 py-4 px-2 border rounded-[15px] flex flex-col items-center justify-center gap-2 transition-all duration-300 ${isActive
-                                        ? "text-white shadow-lg scale-[1.02]"
-                                        : "bg-white border-black/10 text-gray-500 hover:bg-gray-50"
-                                        }`}
-                                    style={{
-                                        backgroundColor: isActive ? ColorGlobal : undefined,
-                                        borderColor: isActive ? ColorGlobal : undefined,
-                                        boxShadow: isActive ? `0 4px 10px ${ColorGlobal}4D` : undefined
-                                    }}
-                                >
-                                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d={method.iconPath} />
-                                    </svg>
-                                    <span className={`text-[10px] font-bold uppercase ${isActive ? "text-white" : "text-gray-400"}`}>
-                                        {method.label}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div> */}
 
                 {/* Notas del pedido */}
                 <div>
