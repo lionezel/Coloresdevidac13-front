@@ -18,4 +18,5 @@ export type Order = {
     total: number;
     mesa?: number;
     mesera?: string;
+    orderNumber?: number;
 }
