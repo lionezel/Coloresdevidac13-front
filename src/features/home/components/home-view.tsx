@@ -25,13 +25,9 @@ export default function HomeView() {
             {/* Header */}
             <header className="flex h-32 w-full items-center justify-between px-6 lg:px-12">
                 <button
-                    onClick={() => router.back()}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100/50 text-gray-600 transition-all hover:bg-gray-200"
+                    className="flex h-12 w-12 items-center justify-center rounded-full  text-gray-600 transition-all "
                     aria-label="Volver"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
                 </button>
 
                 <h1

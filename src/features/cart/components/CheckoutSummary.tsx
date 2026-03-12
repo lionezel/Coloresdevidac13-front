@@ -19,6 +19,7 @@ export default function CheckoutSummary() {
     const router = useRouter();
 
     const [name, setName] = useState("");
+    const [mesa, setMesa] = useState<number | null>(null);
     const [saving, setSaving] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<
         "efectivo" | "tarjeta" | "transferencia" | ""
@@ -51,9 +52,9 @@ export default function CheckoutSummary() {
             return alert("Por favor ingresa tu nombre.");
         }
 
-        if (!paymentMethod) {
-            return alert("Por favor selecciona un método de pago.");
-        }
+        // if (!paymentMethod) {
+        //     return alert("Por favor selecciona un método de pago.");
+        // }
 
         if (cart.length === 0) {
             return alert("El carrito está vacío.");
@@ -98,6 +99,7 @@ export default function CheckoutSummary() {
 
             const orderData = {
                 name,
+                mesa,
                 paymentMethod,
                 notes: orderNotes,
                 products: safeProducts,
@@ -154,23 +156,62 @@ export default function CheckoutSummary() {
                     </div>
                 </div>
 
-                {/* Nombre */}
+                {/* Ubicación / Identificación */}
                 <div>
-                    <label className="block text-sm font-semibold text-[#333] mb-2 font-[Ubuntu] ml-1">
-                        Tu nombre:
+                    <label className="block text-[15px] font-semibold text-[#333] mb-4 font-[Ubuntu] tracking-wide ml-1">
+                        ¿Dónde estás? / Identificación:
                     </label>
-                    <input
-                        type="text"
-                        className={`w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2`}
-                        style={{ '--tw-ring-color': ColorGlobal } as any}
-                        placeholder="Escribe tu nombre"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
+                    <div className="grid grid-cols-5 gap-2 mb-3">
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => {
+                            const isActive = mesa === num;
+                            return (
+                                <button
+                                    key={num}
+                                    onClick={() => {
+                                        setMesa(num);
+                                        setName(`Mesa ${num}`);
+                                    }}
+                                    className={`py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${isActive
+                                        ? "text-white shadow-md scale-[1.05]"
+                                        : "bg-white border-black/10 text-gray-500 hover:bg-gray-50"
+                                        }`}
+                                    style={{
+                                        backgroundColor: isActive ? ColorGlobal : undefined,
+                                        borderColor: isActive ? ColorGlobal : undefined,
+                                        boxShadow: isActive ? `0 4px 10px ${ColorGlobal}4D` : undefined
+                                    }}
+                                >
+                                    {num}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <button
+                        onClick={() => {
+                            setMesa(null);
+                            setName("Crédito");
+                        }}
+                        className={`w-full py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${name === "Crédito"
+                            ? "text-white shadow-md scale-[1.02]"
+                            : "bg-white border-black/10 text-gray-500 hover:bg-gray-50"
+                            }`}
+                        style={{
+                            backgroundColor: name === "Crédito" ? ColorGlobal : undefined,
+                            borderColor: name === "Crédito" ? ColorGlobal : undefined,
+                            boxShadow: name === "Crédito" ? `0 4px 10px ${ColorGlobal}4D` : undefined
+                        }}
+                    >
+                        USUARIO CRÉDITO
+                    </button>
+                    {name && (
+                        <p className="mt-2 text-xs font-[Ubuntu]" style={{ color: ColorGlobal }}>
+                            Seleccionado: <span className="font-bold">{name}</span>
+                        </p>
+                    )}
                 </div>
 
                 {/* Métodos de pago */}
-                <div>
+                {/* <div>
                     <p className="text-[15px] font-semibold text-[#333] mb-4 font-[Ubuntu] tracking-wide ml-1">
                         Método de pago:
                     </p>
@@ -205,7 +246,7 @@ export default function CheckoutSummary() {
                             );
                         })}
                     </div>
-                </div>
+                </div> */}
 
                 {/* Notas del pedido */}
                 <div>
