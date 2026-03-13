@@ -13,7 +13,7 @@ spec:
   tls:
   - hosts:
     - mesera.prioritech.com.co
-    secretName: restabarlabello-ingress-tls
+    secretName: secret-ingress-tls
   rules:
   - host: mesera.prioritech.com.co
     http:
