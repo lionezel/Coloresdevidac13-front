@@ -35,23 +35,30 @@ export default function CheckoutSummary() {
     const [selectedCustomer, setSelectedCustomer] = useState<CreditCustomer | null>(null);
     const [showCustomerSelection, setShowCustomerSelection] = useState(false);
 
+    // Delivery state
+    const [isDelivery, setIsDelivery] = useState(false);
+
     /**
      * Totales
      */
-    const { totalItems, total } = useMemo(() => {
+    const { totalItems, subtotal, shippingCost, total } = useMemo(() => {
         const totalItems = cart.reduce(
             (sum, item) => sum + (item.quantity ?? 1),
             0
         );
 
-        const total = cart.reduce(
+        const subtotal = cart.reduce(
             (sum, item) =>
                 sum + (item.price ?? 0) * (item.quantity ?? 1),
             0
         );
 
-        return { totalItems, total };
-    }, [cart]);
+        // Si son 4 o más productos consideramos que son "muchos" y vale 2000, si no 1000.
+        const shippingCost = isDelivery ? (totalItems >= 4 ? 2000 : 1000) : 0;
+        const total = subtotal + shippingCost;
+
+        return { totalItems, subtotal, shippingCost, total };
+    }, [cart, isDelivery]);
 
     /**
      * Checkout
@@ -108,7 +115,10 @@ export default function CheckoutSummary() {
                 paymentMethod,
                 notes: orderNotes,
                 products: safeProducts,
+                subtotal,
+                shippingCost,
                 total,
+                isDelivery,
                 date: new Date().toISOString(),
                 creditCustomerId: selectedCustomer?.id || null,
                 creditCustomerName: selectedCustomer?.name || null,
@@ -157,7 +167,19 @@ export default function CheckoutSummary() {
                         <span className="text-base font-semibold text-[#333] font-[Ubuntu]">{totalItems}</span>
                     </div>
 
-                    <div className="mt-2 pt-4 border-t border-black/10 flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-3 border-b border-black/10 pb-3">
+                        <span className="text-sm text-gray-600 font-[Ubuntu]">Subtotal:</span>
+                        <span className="text-base font-semibold text-[#333] font-[Ubuntu]">${formatPrice(subtotal)}</span>
+                    </div>
+
+                    {isDelivery && (
+                        <div className="flex justify-between items-center mb-3 border-b border-black/10 pb-3">
+                            <span className="text-sm text-gray-600 font-[Ubuntu]">Costo de Domicilio:</span>
+                            <span className="text-base font-semibold text-[#333] font-[Ubuntu]">${formatPrice(shippingCost)}</span>
+                        </div>
+                    )}
+
+                    <div className="pt-2 flex justify-between items-center">
                         <span className="text-lg font-bold" style={{ color: ColorGlobal }}>Total a pagar:</span>
                         <span className="text-3xl font-extrabold" style={{ color: ColorGlobal }}>
                             ${formatPrice(total)}
@@ -255,6 +277,38 @@ export default function CheckoutSummary() {
                             Seleccionado: <span className="font-bold">
                                 {selectedCustomer ? selectedCustomer.name : name}
                             </span>
+                        </p>
+                    )}
+                </div>
+
+                {/* Opción de Domicilio */}
+                <div>
+                    <button
+                        onClick={() => setIsDelivery(!isDelivery)}
+                        className={`w-full flex justify-between items-center py-4 px-5 rounded-[15px] border transition-all duration-300 ${isDelivery
+                            ? "bg-white border-black/10 shadow-sm"
+                            : "bg-gray-50 border-black/5"
+                            }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isDelivery ? "border-transparent" : "border-gray-300"}`} style={{ backgroundColor: isDelivery ? ColorGlobal : 'transparent' }}>
+                                {isDelivery && (
+                                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="font-bold text-[#333] font-[Ubuntu]">¿Es para Domicilio?</span>
+                        </div>
+                        {isDelivery && (
+                            <span className="text-sm font-bold" style={{ color: ColorGlobal }}>
+                                +${formatPrice(shippingCost)}
+                            </span>
+                        )}
+                    </button>
+                    {isDelivery && (
+                        <p className="mt-2 ml-1 text-xs text-gray-500 font-[Ubuntu]">
+                            {totalItems >= 4 ? "Costo por cantidad mayor a 3 productos ($2.000)" : "Costo estándar de domicilio ($1.000)"}
                         </p>
                     )}
                 </div>

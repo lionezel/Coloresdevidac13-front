@@ -16,6 +16,9 @@ export type Order = {
     paymentMethod: string;
     products: OrderProduct[];
     total: number;
+    subtotal?: number;
+    shippingCost?: number;
+    isDelivery?: boolean;
     mesa?: number;
     mesera?: string;
     orderNumber?: number;
