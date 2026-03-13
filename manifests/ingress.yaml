@@ -27,3 +27,19 @@ spec:
             name: restabarlabello-front
             port:
               number: 80
+  - hosts:
+    - restabar.prioritech.com.co
+    secretName: secret-ingress-tls
+  rules:
+  - host: restabar.prioritech.com.co
+    http:
+      paths:
+      # NUEVA RUTA: Para todas las llamadas a la API (Basado en tus imágenes)
+      # Default route for Frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: restabarlabello-admin
+            port:
+              number: 80
