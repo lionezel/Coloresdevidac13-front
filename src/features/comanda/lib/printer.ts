@@ -1,11 +1,81 @@
 import escpos from 'escpos'
 import Network from 'escpos-network'
 import { Order } from '../types/order.types'
+import { Socket } from 'net'
+
+// Caché para no tener que escanear la red cada vez que se imprime
+let cachedPrinterIp: string | null = null;
+
+const checkPrinterPort = (ip: string, port: number = 9100, timeout: number = 1000): Promise<boolean> => {
+    return new Promise((resolve) => {
+        const socket = new Socket();
+        socket.setTimeout(timeout);
+        
+        socket.on('connect', () => {
+            socket.destroy();
+            resolve(true);
+        });
+        
+        socket.on('timeout', () => {
+            socket.destroy();
+            resolve(false);
+        });
+        
+        socket.on('error', () => {
+            socket.destroy();
+            resolve(false);
+        });
+        
+        socket.connect(port, ip);
+    });
+};
+
+const findPrinterIp = async (): Promise<string | null> => {
+    // Si ya tenemos una IP en caché, primero verificamos si la impresora sigue ahí
+    if (cachedPrinterIp) {
+        const isActive = await checkPrinterPort(cachedPrinterIp);
+        if (isActive) return cachedPrinterIp;
+    }
+
+    // Si no está en caché o cambió, escaneamos el rango de la red actual (192.168.1.1 - 192.168.1.254)
+    const baseIp = '192.168.1.';
+    const scanPromises: Promise<{ ip: string; isOpen: boolean }>[] = [];
+
+    // Saltamos el 0 y 255 (red y broadcast)
+    for (let i = 1; i <= 254; i++) {
+        const ip = `${baseIp}${i}`;
+        scanPromises.push(
+            checkPrinterPort(ip).then(isOpen => ({ ip, isOpen }))
+        );
+    }
+
+    try {
+        // Promise.any retorna la primera promesa que se resuelva exitosamente
+        const firstFoundIp = await Promise.any(
+            scanPromises.map(p => p.then(result => {
+                if (result.isOpen) return result.ip;
+                throw new Error('Not the printer');
+            }))
+        );
+        
+        cachedPrinterIp = firstFoundIp;
+        return firstFoundIp;
+    } catch (e) {
+        // Si todas las promesas fallan (ninguna IP tiene el puerto 9100 abierto)
+        return null;
+    }
+};
 
 export const printOrder = async (order: Order) => {
+    const printerIp = await findPrinterIp();
+    
     return new Promise((resolve, reject) => {
-        // IP de la impresora (esto debería venir de una config)
-        const device = new Network('192.168.1.15')
+        if (!printerIp) {
+            console.error('No se pudo encontrar ninguna impresora en el rango 192.168.1.1 - 192.168.1.254');
+            return reject(new Error('Impresora no encontrada en la red local.'));
+        }
+
+        const device = new Network(printerIp)
         const printer = new escpos.Printer(device)
 
         device.open((err) => {
