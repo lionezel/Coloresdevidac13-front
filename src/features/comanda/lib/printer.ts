@@ -24,9 +24,10 @@ export const printOrder = async (order: Order) => {
                     .text('')
                     .text('')
                     .text('')
-                    .text(`COMANDA #${order.orderNumber ?? ''}`)
+                    .text(order.isDelivery ? `COMANDA - DOMICILIO #${order.orderNumber ?? ''}` : `COMANDA #${order.orderNumber ?? ''}`)
                     .text(`CLIENTE: ${order.name}`)
                 if (order.mesa) printer.text(`MESA: ${order.mesa}`)
+                if (order.isDelivery) printer.text('*** PARA DOMICILIO ***')
 
                 printer
                     .text('--------------------------------')
@@ -45,6 +46,13 @@ export const printOrder = async (order: Order) => {
                 printer
                     .text('--------------------------------')
                     .text(`PAGO: ${order.paymentMethod}`)
+
+                if (order.isDelivery && order.shippingCost) {
+                    printer.text(`SUBTOTAL: $${order.subtotal || (order.total - order.shippingCost)}`)
+                    printer.text(`DOMICILIO: $${order.shippingCost}`)
+                }
+
+                printer
                     .text(`TOTAL: $${order.total}`)
                     .text('--------------------------------')
                     .cut()
