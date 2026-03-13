@@ -14,7 +14,7 @@ extends:
   parameters:
     appName: "restabarlabello-front"
     imageRepository: "restabarlabello-front"
-    secretFileName: "secret.yaml"
+    secretFileName: "restabarlabello-front-secret.yaml"
     deploymentType: "frontend"
     backendAppName: "restabarlabello-backend"
     subdomain: "restabarlabello"
