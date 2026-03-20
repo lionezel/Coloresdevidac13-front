@@ -19,7 +19,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
                 return (
                     <Link
                         key={item.id}
-                        href={`/${encodeURIComponent(item.name)}`}
+                        href={`/${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                         className="group relative flex flex-col items-center overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-sm border border-gray-100 transition-all hover:shadow-xl cursor-pointer"
                     >
                         <div className="w-full aspect-square overflow-hidden rounded-3xl mb-4 bg-gray-50">

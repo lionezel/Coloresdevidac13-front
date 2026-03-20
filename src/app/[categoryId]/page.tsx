@@ -8,6 +8,8 @@ interface Props {
 export default async function CategoryPage({ params }: Props) {
     const { categoryId } = await params;
 
+    const decodedCategoryId = categoryId.replace(/-/g, ' ');
+
     return (
         <Suspense
             fallback={
@@ -16,7 +18,7 @@ export default async function CategoryPage({ params }: Props) {
                 </div>
             }
         >
-            <CategoryView slug={categoryId} />
+            <CategoryView slug={decodedCategoryId} />
         </Suspense>
     );
 }
