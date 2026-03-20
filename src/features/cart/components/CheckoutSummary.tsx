@@ -1,7 +1,7 @@
 "use client";
 
 import { db } from "@/src/firebase/config";
-import { BackgroundColor, ColorGlobal } from "@/src/global/colorGlobal";
+import { ColorGlobal } from "@/src/global/colorGlobal";
 import { RestaurantId } from "@/src/global/id";
 import { useCart } from "@/src/features/cart/hooks/useCart";
 import { useCreditCustomers } from "@/src/features/cart/hooks/useCreditCustomers";
@@ -219,59 +219,6 @@ export default function CheckoutSummary() {
                             );
                         })}
                     </div>
-                    <button
-                        onClick={() => {
-                            setMesa(null);
-                            setName("Crédito");
-                            setShowCustomerSelection(!showCustomerSelection);
-                        }}
-                        className={`w-full py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${name === "Crédito"
-                            ? "text-white shadow-md scale-[1.02]"
-                            : "bg-white border-black/10 text-gray-500 hover:bg-gray-50"
-                            }`}
-                        style={{
-                            backgroundColor: name === "Crédito" ? ColorGlobal : undefined,
-                            borderColor: name === "Crédito" ? ColorGlobal : undefined,
-                            boxShadow: name === "Crédito" ? `0 4px 10px ${ColorGlobal}4D` : undefined
-                        }}
-                    >
-                        USUARIO CRÉDITO
-                    </button>
-
-                    {/* Customer Selection Modal/List */}
-                    {showCustomerSelection && (
-                        <div className="mt-3 p-4 bg-gray-50 rounded-[15px] border border-black/5 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <p className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">Selecciona el cliente:</p>
-                            {loadingCustomers ? (
-                                <p className="text-sm text-gray-400">Cargando clientes...</p>
-                            ) : customers.length > 0 ? (
-                                <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-1">
-                                    {customers.map((customer) => (
-                                        <button
-                                            key={customer.id}
-                                            onClick={() => {
-                                                setSelectedCustomer(customer);
-                                                setShowCustomerSelection(false);
-                                            }}
-                                            className={`py-2 px-3 rounded-[10px] text-xs font-semibold border transition-all ${selectedCustomer?.id === customer.id
-                                                ? "text-white"
-                                                : "bg-white border-black/5 text-gray-600 hover:bg-white/80"
-                                                }`}
-                                            style={{
-                                                backgroundColor: selectedCustomer?.id === customer.id ? ColorGlobal : undefined,
-                                                borderColor: selectedCustomer?.id === customer.id ? ColorGlobal : undefined,
-                                            }}
-                                        >
-                                            {customer.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-gray-400 text-center py-2">No hay clientes registrados.</p>
-                            )}
-                        </div>
-                    )}
-
                     {name && (
                         <p className="mt-2 text-xs font-[Ubuntu]" style={{ color: ColorGlobal }}>
                             Seleccionado: <span className="font-bold">
@@ -282,7 +229,7 @@ export default function CheckoutSummary() {
                 </div>
 
                 {/* Opción de Domicilio */}
-                <div>
+                {/* <div>
                     <button
                         onClick={() => setIsDelivery(!isDelivery)}
                         className={`w-full flex justify-between items-center py-4 px-5 rounded-[15px] border transition-all duration-300 ${isDelivery
@@ -311,7 +258,7 @@ export default function CheckoutSummary() {
                             {totalItems >= 4 ? "Costo por cantidad mayor a 3 productos ($2.000)" : "Costo estándar de domicilio ($1.000)"}
                         </p>
                     )}
-                </div>
+                </div> */}
 
                 {/* Notas del pedido */}
                 <div>
