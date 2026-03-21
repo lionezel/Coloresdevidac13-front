@@ -73,60 +73,63 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
     return (
         <div className="w-full">
             {/* Products Grid */}
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4 sm:px-6">
-                {products.map((product) => {
+            <div className="grid grid-cols-1 gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4 sm:px-6">
+                {products.map((product, index) => {
                     const variant = defaultVariant(product);
                     if (!variant) return null;
 
                     return (
                         <motion.div
                             key={product.id}
-                            className="bg-white rounded-[2rem] overflow-hidden shadow-[0_10px_20px_rgba(0,0,0,0.05),0_6px_6px_rgba(0,0,0,0.05)] border border-gray-100/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all cursor-pointer flex flex-col h-full"
-                            whileHover={{ y: -8 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05, type: "spring", stiffness: 100 }}
+                            className="bg-white rounded-[1.8rem] sm:rounded-[2rem] overflow-hidden shadow-[0_8px_20px_rgb(0,0,0,0.03)] border border-gray-100/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-300 cursor-pointer flex flex-col h-full group"
+                            whileHover={{ y: -6 }}
                             onClick={() => openSelectionModal(product, variant)}
                         >
-                            <div className="w-full aspect-square bg-[#f9f9f9] overflow-hidden relative">
+                            <div className="w-full aspect-[4/3] sm:aspect-square bg-gray-50 overflow-hidden relative">
                                 {variant.image ? (
                                     <img
                                         src={variant.image}
                                         alt={product.name}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
-                            <div className="p-7 flex flex-col flex-1">
-                                <h3 className="text-xl font-bold font-[Ubuntu] text-[#1a1a1a] mb-2">
+                            <div className="p-5 sm:p-7 flex flex-col flex-1">
+                                <h3 className="text-lg sm:text-xl font-bold font-[Ubuntu] text-gray-900 mb-1.5 line-clamp-1">
                                     {product.name}
-                                </h3>
+                               </h3>
                                 {product.description && (
-                                    <p className="text-sm text-gray-500 line-clamp-2 mb-6 leading-relaxed">
+                                    <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mb-4 sm:mb-6 leading-relaxed">
                                         {product.description}
                                     </p>
                                 )}
                                 <div className="mt-auto flex items-center justify-between">
                                     <span
-                                        className="text-2xl font-black"
+                                        className="text-xl sm:text-2xl font-black"
                                         style={{ color: ColorGlobal }}
                                     >
                                         $ {formatPrice(variant.price)}
                                     </span>
                                     <button
-                                        className="h-12 w-12 flex items-center justify-center rounded-[1.2rem] text-white shadow-lg active:scale-90 transition-all"
-                                        style={{ backgroundColor: ColorGlobal, boxShadow: `0 8px 16px ${ColorGlobal}40` }}
+                                        className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-[1rem] sm:rounded-[1.2rem] text-white shadow-lg active:scale-90 transition-transform hover:scale-105"
+                                        style={{ backgroundColor: ColorGlobal, boxShadow: `0 6px 16px ${ColorGlobal}40` }}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             openSelectionModal(product, variant);
                                         }}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
                                         </svg>
                                     </button>
                                 </div>
@@ -144,7 +147,7 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                             onClick={() => setIsModalVisible(false)}
                         />
                         <motion.div
@@ -152,62 +155,67 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: "100%", opacity: 1 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                            className="relative w-full max-w-lg bg-white rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh]"
                         >
+                            {/* Mobile Drag Indicator */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden">
+                                <div className="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+                            </div>
+                            
                             {/* Modal Header */}
-                            <div className="flex items-center justify-between p-8 pb-4">
-                                <h2 className="text-2xl font-black font-[Ubuntu] text-[#333]">
+                            <div className="flex items-center justify-between p-6 sm:p-8 sm:pb-4 pt-4 sm:pt-6">
+                                <h2 className="text-xl sm:text-2xl font-black font-[Ubuntu] text-gray-900 pr-4">
                                     {selectedProduct?.name}
                                 </h2>
                                 <button
                                     onClick={() => setIsModalVisible(false)}
-                                    className="p-2 text-gray-400 hover:text-black transition-colors bg-gray-100 rounded-full"
+                                    className="p-2 sm:p-2.5 text-gray-400 hover:text-gray-800 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full flex-shrink-0"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
 
                             {/* Modal Body */}
-                            <div className="p-8 pt-0 overflow-y-auto custom-scrollbar">
-                                <p className="text-gray-500 mb-8 leading-relaxed text-base">
+                            <div className="p-6 sm:p-8 pt-0 overflow-y-auto custom-scrollbar">
+                                <p className="text-gray-500 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
                                     {selectedProduct?.description}
                                 </p>
 
                                 {additions.length > 0 && (
-                                    <div className="space-y-6">
-                                        <h3 className="text-lg font-bold text-[#333]">Personaliza tu pedido</h3>
-                                        <div className="space-y-4">
+                                    <div className="space-y-4 sm:space-y-6">
+                                        <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">Personaliza tu pedido</h3>
+                                        <div className="space-y-3 sm:space-y-4">
                                             {additions.map((addition) => {
                                                 const isSelected = selectedAdditions.some((a) => a.id === addition.id);
                                                 return (
                                                     <button
                                                         key={addition.id}
                                                         onClick={() => toggleAddition(addition)}
-                                                        className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all active:scale-[0.98] ${isSelected
+                                                        className={`w-full flex items-center justify-between p-4 sm:p-5 rounded-[1.2rem] border-2 transition-all active:scale-[0.98] ${isSelected
                                                             ? "border-transparent text-white"
-                                                            : "bg-[#f8f8f8] border-[#eee] text-[#333] hover:border-gray-300"
+                                                            : "bg-gray-50/50 border-gray-100 text-gray-800 hover:border-gray-200 hover:bg-gray-100/50"
                                                             }`}
-                                                        style={isSelected ? { backgroundColor: ColorGlobal } : {}}
+                                                        style={isSelected ? { backgroundColor: ColorGlobal, borderColor: ColorGlobal } : {}}
                                                     >
                                                         <div className="text-left">
-                                                            <p className="font-bold text-[1.05rem]">
+                                                            <p className="font-bold text-[0.95rem] sm:text-[1.05rem]">
                                                                 {addition.name}
                                                             </p>
-                                                            <p className={`text-sm mt-0.5 ${isSelected ? "text-white/90" : "text-gray-500"}`}>
+                                                            <p className={`text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-gray-500"}`}>
                                                                 {addition.price < 0 ? "-" : "+"} ${formatPrice(Math.abs(addition.price))}
                                                             </p>
                                                         </div>
-                                                        <div className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${isSelected ? "bg-white" : "text-gray-300"
+                                                        <div className={`h-6 w-6 sm:h-7 sm:w-7 rounded-full flex items-center justify-center transition-all ${isSelected ? "bg-white" : "text-gray-300"
                                                             }`}>
                                                             {isSelected ? (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" style={{ color: ColorGlobal }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: ColorGlobal }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                                 </svg>
                                                             ) : (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" style={{ color: ColorGlobal }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" style={{ color: ColorGlobal }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                 </svg>
                                                             )}
                                                         </div>
@@ -220,10 +228,10 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="p-8 border-t border-gray-100 bg-[#f9f9f9]/50 flex items-center gap-6">
+                            <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50/50 flex items-center gap-4 sm:gap-6 pb-8 sm:pb-8">
                                 <div className="flex-1">
-                                    <p className="text-[0.8rem] text-gray-400 font-bold uppercase tracking-widest mb-1">Total</p>
-                                    <p className="text-3xl font-black" style={{ color: ColorGlobal }}>
+                                    <p className="text-[0.7rem] sm:text-[0.8rem] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Total</p>
+                                    <p className="text-2xl sm:text-3xl font-black" style={{ color: ColorGlobal }}>
                                         $ {formatPrice(
                                             (selectedVariant?.price || 0) +
                                             selectedAdditions.reduce((acc, curr) => acc + curr.price, 0)
@@ -232,10 +240,10 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
                                 </div>
                                 <button
                                     onClick={handleConfirmAddToCart}
-                                    className="px-10 py-5 rounded-2xl text-white font-bold text-lg shadow-xl active:scale-95 transition-all text-center"
-                                    style={{ backgroundColor: ColorGlobal, boxShadow: `0 12px 24px ${ColorGlobal}30` }}
+                                    className="px-6 sm:px-10 py-4 sm:py-5 rounded-[1.2rem] text-white font-bold text-base sm:text-lg shadow-xl active:scale-95 transition-all text-center"
+                                    style={{ backgroundColor: ColorGlobal, boxShadow: `0 8px 20px ${ColorGlobal}40` }}
                                 >
-                                    Agregar al carrito
+                                    Agregar
                                 </button>
                             </div>
                         </motion.div>
@@ -245,17 +253,17 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
 
             <style jsx>{`
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
+                    width: 5px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-track {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #eee;
+                    background: #e2e8f0;
                     border-radius: 10px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #ddd;
+                    background: #cbd5e1;
                 }
             `}</style>
         </div>

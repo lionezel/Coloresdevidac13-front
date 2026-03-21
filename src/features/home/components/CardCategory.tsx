@@ -4,67 +4,70 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ColorCoffee } from "@/src/global/colorGlobal";
 import { category } from "../types/category";
+import { motion } from "framer-motion";
 
 interface CategoryCardProps {
     category: category[];
 }
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
-    const router = useRouter();
-
     return (
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-7xl px-4">
-            {category.map((item) => {
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full">
+            {category.map((item, index) => {
                 console.log("Navigating to category:", item.name);
                 return (
-                    <Link
+                    <motion.div
                         key={item.id}
-                        href={`/${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="group relative flex flex-col items-center overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-sm border border-gray-100 transition-all hover:shadow-xl cursor-pointer"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1, type: "spring", stiffness: 100, damping: 15 }}
                     >
-                        <div className="w-full aspect-square overflow-hidden rounded-3xl mb-4 bg-gray-50">
-                            {item.banner ? (
-                                <img
-                                    src={item.banner}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-                            ) : (
-                                <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                            )}
-                        </div>
-
-                        <h3
-                            className="text-3xl font-black uppercase tracking-tight font-[Ubuntu]"
-                            style={{ color: ColorCoffee }}
+                        <Link
+                            href={`/${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            className="group relative flex flex-col items-center overflow-hidden rounded-[2rem] bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-gray-100/80 transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full"
                         >
-                            {item.name}
-                        </h3>
+                            <div className="w-full aspect-[4/3] sm:aspect-square overflow-hidden rounded-[1.5rem] mb-5 bg-gray-50/50">
+                                {item.banner ? (
+                                    <img
+                                        src={item.banner}
+                                        alt={item.name}
+                                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                ) : (
+                                    <div className="h-full w-full flex items-center justify-center bg-gray-50/50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                )}
+                            </div>
 
-                        <span className="mt-1 text-sm font-medium text-gray-400 capitalize">
-                            {Math.floor(Math.random() * 10) + 1} items
-                        </span>
-
-                        <div
-                            className="mt-4 flex items-center justify-center text-gray-400 transition-colors"
-                            onMouseEnter={(e) => (e.currentTarget.style.color = ColorCoffee)}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = 'inherit')}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+                            <h3
+                                className="text-2xl sm:text-3xl font-black uppercase tracking-tight font-[Ubuntu] transition-colors"
+                                style={{ color: ColorCoffee }}
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </Link>
+                                {item.name}
+                            </h3>
+
+                            <span className="mt-1.5 text-xs sm:text-sm font-semibold text-gray-400/80 uppercase tracking-wider">
+                                {Math.floor(Math.random() * 10) + 1} items
+                            </span>
+
+                            <div
+                                className="mt-5 flex items-center justify-center text-gray-300 transition-all duration-300 group-hover:text-gray-800"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 transform transition-transform group-hover:translate-x-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </Link>
+                    </motion.div>
                 );
             })}
         </div>
