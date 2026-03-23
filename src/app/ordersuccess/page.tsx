@@ -15,7 +15,7 @@ export default function OrderSuccessPage() {
 
             const lastOrder = JSON.parse(lastOrderStr);
 
-            await sendToKitchen(lastOrder);
+            // await sendToKitchen(lastOrder);
 
             sessionStorage.removeItem("lastOrder");
             router.push("/");

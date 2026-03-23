@@ -31,10 +31,16 @@ const checkPrinterPort = (ip: string, port: number = 9100, timeout: number = 100
 };
 
 const findPrinterIp = async (): Promise<string | null> => {
-    // Si ya tenemos una IP en caché, primero verificamos si la impresora sigue ahí
+    // Si ya tenemos una IP en caché, la retornamos directamente
+    // Evitamos hacer ping cada vez para no bloquear el puerto de la impresora
     if (cachedPrinterIp) {
-        const isActive = await checkPrinterPort(cachedPrinterIp);
-        if (isActive) return cachedPrinterIp;
+        return cachedPrinterIp;
+    }
+
+    // Buscamos variable de entorno por si la IP está configurada de manera estática
+    if (process.env.PRINTER_IP) {
+        cachedPrinterIp = process.env.PRINTER_IP;
+        return cachedPrinterIp;
     }
 
     // Si no está en caché o cambió, escaneamos el rango de la red actual (192.168.1.1 - 192.168.1.254)
@@ -59,6 +65,10 @@ const findPrinterIp = async (): Promise<string | null> => {
         );
         
         cachedPrinterIp = firstFoundIp;
+        
+        // Pausa de 2 segundos para permitir a la impresora liberar el puerto tras el escaneo
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         return firstFoundIp;
     } catch (e) {
         // Si todas las promesas fallan (ninguna IP tiene el puerto 9100 abierto)
@@ -81,6 +91,10 @@ export const printOrder = async (order: Order) => {
         device.open((err) => {
             if (err) {
                 console.error('Error opening device:', err)
+                // Limpiamos caché si la IP dejó de funcionar, a menos que esté forzada por variable
+                if (!process.env.PRINTER_IP) {
+                    cachedPrinterIp = null;
+                }
                 return reject(err)
             }
 

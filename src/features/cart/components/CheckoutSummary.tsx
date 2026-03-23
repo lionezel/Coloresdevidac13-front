@@ -192,6 +192,23 @@ export default function CheckoutSummary() {
                     <label className="block text-[15px] font-semibold text-[#333] mb-4 font-[Ubuntu] tracking-wide ml-1">
                         ¿Dónde estás? / Identificación:
                     </label>
+
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="Ej. Juan Pérez o Recoge en barra..."
+                            className="w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2"
+                            style={{ '--tw-ring-color': ColorGlobal } as any}
+                            value={name}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                setMesa(null);
+                                setSelectedCustomer(null);
+                                setShowCustomerSelection(false);
+                            }}
+                        />
+                    </div>
+
                     <div className="grid grid-cols-5 gap-2 mb-3">
                         {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => {
                             const isActive = mesa === num;
