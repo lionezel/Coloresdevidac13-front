@@ -25,9 +25,15 @@ export default function HomeView() {
             {/* Header */}
             <header className="flex h-24 sm:h-32 w-full items-center justify-between px-6 lg:px-12 sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-gray-100/50 shadow-sm transition-all">
                 <button
-                    className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full text-gray-600 transition-all hover:bg-gray-100"
-                    aria-label="Volver"
+                    onClick={() => router.push('/orders')}
+                    className="flex h-10 px-4 sm:h-12 items-center justify-center rounded-full bg-white font-bold shadow-sm transition-all hover:bg-gray-50 border border-black/10"
+                    style={{ color: ColorCoffee }}
+                    aria-label="Ver Pedidos Activos"
                 >
+                    <svg className="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span className="hidden sm:inline font-[Ubuntu]">Pedidos</span>
                 </button>
 
                 <h1

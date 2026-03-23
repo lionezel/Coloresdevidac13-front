@@ -22,4 +22,5 @@ export type Order = {
     mesa?: number;
     mesera?: string;
     orderNumber?: number;
+    state?: 'en_orden' | 'en_caja' | 'listo / caja';
 }

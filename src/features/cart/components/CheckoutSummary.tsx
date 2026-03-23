@@ -12,8 +12,11 @@ import {
     addDoc,
     collection,
     serverTimestamp,
+    doc,
+    getDoc,
+    updateDoc,
 } from "firebase/firestore";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 export default function CheckoutSummary() {
     const { cart, loading, clearCart } = useCart();
@@ -37,6 +40,19 @@ export default function CheckoutSummary() {
 
     // Delivery state
     const [isDelivery, setIsDelivery] = useState(false);
+
+    // Editing Order State
+    const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+    const [editingOrderName, setEditingOrderName] = useState<string | null>(null);
+
+    useEffect(() => {
+        const id = sessionStorage.getItem("editingOrderId");
+        const nameOrder = sessionStorage.getItem("editingOrderName");
+        if (id) {
+            setEditingOrderId(id);
+            setEditingOrderName(nameOrder);
+        }
+    }, []);
 
     /**
      * Totales
@@ -109,6 +125,31 @@ export default function CheckoutSummary() {
                 additions: item.additions ?? [],
             }));
 
+            if (editingOrderId) {
+                const orderRef = doc(db, "restaurants", RestaurantId, "orders", editingOrderId);
+                const orderSnap = await getDoc(orderRef);
+                
+                if (orderSnap.exists()) {
+                    const existingOrder = orderSnap.data();
+                    const updatedProducts = [...(existingOrder.products || []), ...safeProducts];
+                    const updatedSubtotal = (existingOrder.subtotal || 0) + subtotal;
+                    const updatedTotal = (existingOrder.total || 0) + subtotal; // We only add subtotal of new cart to existing order
+
+                    await updateDoc(orderRef, {
+                        products: updatedProducts,
+                        subtotal: updatedSubtotal,
+                        total: updatedTotal,
+                    });
+                    
+                    sessionStorage.removeItem("editingOrderId");
+                    sessionStorage.removeItem("editingOrderName");
+                    
+                    await clearCart();
+                    router.push("/ordersuccess");
+                    return;
+                }
+            }
+
             const orderData = {
                 name: selectedCustomer ? selectedCustomer.name : name,
                 mesa,
@@ -122,6 +163,7 @@ export default function CheckoutSummary() {
                 date: new Date().toISOString(),
                 creditCustomerId: selectedCustomer?.id || null,
                 creditCustomerName: selectedCustomer?.name || null,
+                status: "en_orden",
             };
 
             console.log("ORDEN A GUARDAR:", orderData);
@@ -138,8 +180,8 @@ export default function CheckoutSummary() {
             await clearCart();
             router.push("/ordersuccess");
         } catch (error) {
-            console.error("Error creando orden:", error);
-            alert("No se pudo crear la orden.");
+            console.error("Error creando/actualizando orden:", error);
+            alert("No se pudo completar la operación.");
         } finally {
             setSaving(false);
         }
@@ -155,6 +197,29 @@ export default function CheckoutSummary() {
 
     return (
         <div className="flex flex-col h-full bg-white lg:bg-transparent">
+            {editingOrderId && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-xl p-4 mb-4 font-[Ubuntu]">
+                    <div className="flex items-center gap-2 font-bold mb-1">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Agregando a pedido existente
+                    </div>
+                    <p className="text-sm">Se sumarán estos productos al pedido: <strong>{editingOrderName}</strong></p>
+                    <button 
+                        onClick={() => {
+                            sessionStorage.removeItem("editingOrderId");
+                            sessionStorage.removeItem("editingOrderName");
+                            setEditingOrderId(null);
+                            setEditingOrderName(null);
+                        }}
+                        className="text-xs text-blue-600 font-bold mt-2 underline"
+                    >
+                        Cancelar y crear pedido nuevo
+                    </button>
+                </div>
+            )}
+
             <h2 className="text-2xl font-bold mb-6 text-center text-[#333] font-[Ubuntu]">
                 Resumen de compra
             </h2>
