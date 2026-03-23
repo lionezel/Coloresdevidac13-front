@@ -12,9 +12,9 @@ resources:
 extends:
   template: templates/build-microservice.yml@devops
   parameters:
-    appName: "restabarlabello-front"
-    imageRepository: "restabarlabello-front"
-    secretFileName: "restabarlabello-front-secret.yaml"
+    appName: "coloresdevida-front"
+    imageRepository: ""coloresdevida-front"
+    secretFileName: ""coloresdevida-front-secret.yaml"
     deploymentType: "frontend"
-    backendAppName: "restabarlabello-backend"
-    subdomain: "restabarlabello"
+    backendAppName: ""coloresdevida-backend"
+    subdomain: ""coloresdevida"
