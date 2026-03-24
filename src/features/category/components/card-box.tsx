@@ -22,11 +22,13 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
     const [selectedAdditions, setSelectedAdditions] = useState<Addition[]>([]);
+    const [quantity, setQuantity] = useState(1);
 
     const openSelectionModal = (product: Product, variant: Variant) => {
         setSelectedProduct(product);
         setSelectedVariant(variant);
         setSelectedAdditions([]);
+        setQuantity(1);
         setIsModalVisible(true);
     };
 
@@ -63,7 +65,7 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
             price: finalPrice,
             image: selectedVariant.image,
             additions: selectedAdditions.map((a) => ({ id: a.id, name: a.name, price: a.price })),
-        });
+        }, quantity);
 
         setIsModalVisible(false);
     };
@@ -228,22 +230,55 @@ export const CardBox: React.FC<CardBoxProps> = ({ products, additions }) => {
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50/50 flex items-center gap-4 sm:gap-6 pb-8 sm:pb-8">
-                                <div className="flex-1">
-                                    <p className="text-[0.7rem] sm:text-[0.8rem] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Total</p>
-                                    <p className="text-2xl sm:text-3xl font-black" style={{ color: ColorGlobal }}>
-                                        $ {formatPrice(
-                                            (selectedVariant?.price || 0) +
-                                            selectedAdditions.reduce((acc, curr) => acc + curr.price, 0)
+                            <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col gap-4 sm:gap-6 pb-8 sm:pb-8">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                        <p className="text-[0.7rem] sm:text-[0.8rem] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Total</p>
+                                        <p className="text-2xl sm:text-3xl font-black" style={{ color: ColorGlobal }}>
+                                            $ {formatPrice(
+                                                ((selectedVariant?.price || 0) +
+                                                    selectedAdditions.reduce((acc, curr) => acc + curr.price, 0)) * quantity
+                                            )}
+                                        </p>
+                                        {quantity > 1 && (
+                                            <p className="text-[0.65rem] text-gray-400 mt-0.5">
+                                                $ {formatPrice(
+                                                    (selectedVariant?.price || 0) +
+                                                    selectedAdditions.reduce((acc, curr) => acc + curr.price, 0)
+                                                )} por unidad
+                                            </p>
                                         )}
-                                    </p>
+                                    </div>
+
+                                    {/* Quantity Controls */}
+                                    <div className="flex items-center bg-white rounded-2xl border border-gray-100 p-1 shadow-sm">
+                                        <button
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-50 active:scale-90 transition-all text-gray-400 hover:text-red-500"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M18 12H6" />
+                                            </svg>
+                                        </button>
+                                        <span className="w-10 text-center font-bold text-lg tabular-nums">{quantity}</span>
+                                        <button
+                                            onClick={() => setQuantity(quantity + 1)}
+                                            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-50 active:scale-90 transition-all"
+                                            style={{ color: ColorGlobal }}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
+
                                 <button
                                     onClick={handleConfirmAddToCart}
-                                    className="px-6 sm:px-10 py-4 sm:py-5 rounded-[1.2rem] text-white font-bold text-base sm:text-lg shadow-xl active:scale-95 transition-all text-center"
+                                    className="w-full py-4 sm:py-5 rounded-[1.2rem] text-white font-bold text-base sm:text-lg shadow-xl active:scale-95 transition-all text-center"
                                     style={{ backgroundColor: ColorGlobal, boxShadow: `0 8px 20px ${ColorGlobal}40` }}
                                 >
-                                    Agregar
+                                    Agregar al pedido
                                 </button>
                             </div>
                         </motion.div>

@@ -24,7 +24,7 @@ export const useCart = () => {
         return () => unsubscribe();
     }, []);
 
-    const addToCart = async (item: Omit<CartItem, "id" | "userId" | "quantity" | "addedAt">) => {
+    const addToCart = async (item: Omit<CartItem, "id" | "userId" | "quantity" | "addedAt">, quantity: number = 1) => {
         try {
             const cartRef = collection(db, "restaurants", RestaurantId, "cart");
             const q = query(
@@ -42,13 +42,13 @@ export const useCart = () => {
                 await updateDoc(
                     doc(db, "restaurants", RestaurantId, "cart", cartItem.id),
                     {
-                        quantity: currentQuantity + 1,
+                        quantity: currentQuantity + quantity,
                     }
                 );
             } else {
                 await addDoc(cartRef, {
                     ...item,
-                    quantity: 1,
+                    quantity: quantity,
                     addedAt: new Date(),
                 });
             }
