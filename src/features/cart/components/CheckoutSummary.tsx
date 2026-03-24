@@ -80,11 +80,11 @@ export default function CheckoutSummary() {
      * Checkout
      */
     const handleCheckout = async () => {
-        if (!name.trim()) {
+        if (!editingOrderId && !name.trim()) {
             return alert("Por favor ingresa tu nombre.");
         }
 
-        if (name === "Crédito" && !selectedCustomer) {
+        if (!editingOrderId && name === "Crédito" && !selectedCustomer) {
             return alert("Por favor selecciona un cliente para el crédito.");
         }
 
@@ -128,7 +128,7 @@ export default function CheckoutSummary() {
             if (editingOrderId) {
                 const orderRef = doc(db, "restaurants", RestaurantId, "orders", editingOrderId);
                 const orderSnap = await getDoc(orderRef);
-                
+
                 if (orderSnap.exists()) {
                     const existingOrder = orderSnap.data();
                     const updatedProducts = [...(existingOrder.products || []), ...safeProducts];
@@ -140,10 +140,10 @@ export default function CheckoutSummary() {
                         subtotal: updatedSubtotal,
                         total: updatedTotal,
                     });
-                    
+
                     sessionStorage.removeItem("editingOrderId");
                     sessionStorage.removeItem("editingOrderName");
-                    
+
                     await clearCart();
                     router.push("/ordersuccess");
                     return;
@@ -206,7 +206,7 @@ export default function CheckoutSummary() {
                         Agregando a pedido existente
                     </div>
                     <p className="text-sm">Se sumarán estos productos al pedido: <strong>{editingOrderName}</strong></p>
-                    <button 
+                    <button
                         onClick={() => {
                             sessionStorage.removeItem("editingOrderId");
                             sessionStorage.removeItem("editingOrderName");
@@ -253,62 +253,64 @@ export default function CheckoutSummary() {
                 </div>
 
                 {/* Ubicación / Identificación */}
-                <div>
-                    <label className="block text-[15px] font-semibold text-[#333] mb-4 font-[Ubuntu] tracking-wide ml-1">
-                        ¿Dónde estás? / Identificación:
-                    </label>
+                {!editingOrderId && (
+                    <div>
+                        <label className="block text-[15px] font-semibold text-[#333] mb-4 font-[Ubuntu] tracking-wide ml-1">
+                            ¿Dónde estás? / Identificación:
+                        </label>
 
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            placeholder="Ej. Juan Pérez o Recoge en barra..."
-                            className="w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2"
-                            style={{ '--tw-ring-color': ColorGlobal } as any}
-                            value={name}
-                            onChange={(e) => {
-                                setName(e.target.value);
-                                setMesa(null);
-                                setSelectedCustomer(null);
-                                setShowCustomerSelection(false);
-                            }}
-                        />
-                    </div>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                placeholder="Ej. Juan Pérez o Recoge en barra..."
+                                className="w-full border border-black/10 rounded-[15px] p-4 text-[15px] text-[#333] bg-white font-[Ubuntu] shadow-sm focus:outline-none focus:ring-2"
+                                style={{ '--tw-ring-color': ColorGlobal } as any}
+                                value={name}
+                                onChange={(e) => {
+                                    setName(e.target.value);
+                                    setMesa(null);
+                                    setSelectedCustomer(null);
+                                    setShowCustomerSelection(false);
+                                }}
+                            />
+                        </div>
 
-                    <div className="grid grid-cols-5 gap-2 mb-3">
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => {
-                            const isActive = mesa === num;
-                            return (
-                                <button
-                                    key={num}
-                                    onClick={() => {
-                                        setMesa(num);
-                                        setName(`Mesa ${num}`);
-                                        setSelectedCustomer(null);
-                                        setShowCustomerSelection(false);
-                                    }}
-                                    className={`py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${isActive
-                                        ? "text-white shadow-md scale-[1.05]"
-                                        : "bg-white border-black/10 text-gray-500 hover:bg-gray-50"
-                                        }`}
-                                    style={{
-                                        backgroundColor: isActive ? ColorGlobal : undefined,
-                                        borderColor: isActive ? ColorGlobal : undefined,
-                                        boxShadow: isActive ? `0 4px 10px ${ColorGlobal}4D` : undefined
-                                    }}
-                                >
-                                    {num}
-                                </button>
-                            );
-                        })}
+                        <div className="grid grid-cols-5 gap-2 mb-3">
+                            {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => {
+                                const isActive = mesa === num;
+                                return (
+                                    <button
+                                        key={num}
+                                        onClick={() => {
+                                            setMesa(num);
+                                            setName(`Mesa ${num}`);
+                                            setSelectedCustomer(null);
+                                            setShowCustomerSelection(false);
+                                        }}
+                                        className={`py-3 rounded-[12px] text-sm font-bold border transition-all duration-300 ${isActive
+                                            ? "text-white shadow-md scale-[1.05]"
+                                            : "bg-white border-black/10 text-gray-500 hover:bg-gray-50"
+                                            }`}
+                                        style={{
+                                            backgroundColor: isActive ? ColorGlobal : undefined,
+                                            borderColor: isActive ? ColorGlobal : undefined,
+                                            boxShadow: isActive ? `0 4px 10px ${ColorGlobal}4D` : undefined
+                                        }}
+                                    >
+                                        {num}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        {name && (
+                            <p className="mt-2 text-xs font-[Ubuntu]" style={{ color: ColorGlobal }}>
+                                Seleccionado: <span className="font-bold">
+                                    {selectedCustomer ? selectedCustomer.name : name}
+                                </span>
+                            </p>
+                        )}
                     </div>
-                    {name && (
-                        <p className="mt-2 text-xs font-[Ubuntu]" style={{ color: ColorGlobal }}>
-                            Seleccionado: <span className="font-bold">
-                                {selectedCustomer ? selectedCustomer.name : name}
-                            </span>
-                        </p>
-                    )}
-                </div>
+                )}
 
                 {/* Opción de Domicilio */}
                 {/* <div>

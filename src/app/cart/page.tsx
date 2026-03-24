@@ -57,7 +57,7 @@ export default function CartPage() {
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 -mr-4">
+                            <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar pr-2 -mr-2 pl-1">
                                 <CardCart />
                             </div>
                         )}

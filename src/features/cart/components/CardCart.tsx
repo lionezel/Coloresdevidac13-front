@@ -11,83 +11,83 @@ export const CardCart: React.FC = () => {
     const { formatPrice } = useFormatPrice();
 
     return (
-        <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-3 w-full">
             <AnimatePresence mode="popLayout">
                 {cart.map((item) => (
                     <motion.div
                         key={item.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.95, y: 16 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8, x: -20 }}
-                        className="relative flex items-center bg-white rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-4 pl-16 sm:pl-24 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all group w-full ml-4 sm:ml-6 my-2"
+                        exit={{ opacity: 0, scale: 0.9, x: -16 }}
+                        className="flex items-center gap-3 sm:gap-4 bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 w-full"
                     >
-                        {/* Image Wrapper (Absolute like in RN snippet) */}
-                        <div className="absolute -left-8 sm:-left-6 top-1/2 -translate-y-1/2 z-10 p-1 sm:p-1.5 bg-white rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.08)] group-hover:scale-105 transition-transform duration-300">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gray-50 border-2 border-white">
-                                {item.image ? (
-                                    <img
-                                        src={item.image}
-                                        alt={item.productName}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                )}
-                            </div>
+                        {/* Image */}
+                        <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                            {item.image ? (
+                                <img
+                                    src={item.image}
+                                    alt={item.productName}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Text Content */}
-                        <div className="flex-1 min-w-0 pr-2 sm:pr-4 pl-2 sm:pl-0">
-                            <h3 className="text-base sm:text-lg font-bold text-[#1a1a1a] truncate font-[Ubuntu]">
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-sm sm:text-base font-bold text-[#1a1a1a] truncate font-[Ubuntu] leading-tight">
                                 {item.productName}
                             </h3>
 
-                            {/* Additions */}
                             {item.additions && item.additions.length > 0 && (
-                                <div className="mt-0.5 sm:mt-1 flex flex-wrap gap-1">
+                                <div className="mt-0.5 flex flex-wrap gap-x-1">
                                     {item.additions.map((add, idx) => (
-                                        <span key={idx} className="text-[0.65rem] sm:text-[0.75rem] text-gray-400 italic">
-                                            • {add.name}{idx < item.additions!.length - 1 ? "" : ""}
+                                        <span key={idx} className="text-[0.65rem] text-gray-400 italic">
+                                            • {add.name}
                                         </span>
                                     ))}
                                 </div>
                             )}
 
-                            <div className="mt-1.5 sm:mt-2 text-lg sm:text-xl font-black" style={{ color: ColorGlobal }}>
+                            <div className="mt-1.5 text-base sm:text-lg font-black" style={{ color: ColorGlobal }}>
                                 ${formatPrice(item.price * item.quantity)}
                             </div>
+
+                            {item.quantity > 1 && (
+                                <p className="text-[0.65rem] text-gray-400 mt-0.5">
+                                    ${formatPrice(item.price)} × {item.quantity}
+                                </p>
+                            )}
                         </div>
 
-                        {/* Quantity Controls (Pill like in RN snippet) */}
-                        <div className="flex flex-col items-center justify-center -mr-6 sm:-mr-8">
-                            <div className="flex flex-col items-center bg-white rounded-full border border-gray-100/80 shadow-sm overflow-hidden p-0.5 sm:p-1">
-                                <button
-                                    onClick={() => increaseQuantity(item.id)}
-                                    className="p-1.5 sm:p-2 hover:bg-gray-50 active:scale-90 transition-all rounded-full"
-                                    style={{ color: ColorGlobal }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 12h8" />
-                                    </svg>
-                                </button>
+                        {/* Quantity Controls */}
+                        <div className="shrink-0 flex flex-col items-center gap-1 bg-gray-50 rounded-xl border border-gray-100 p-1 sm:p-1.5">
+                            <button
+                                onClick={() => increaseQuantity(item.id)}
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-white active:scale-90 transition-all shadow-sm"
+                                style={{ color: ColorGlobal }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16M4 12h16" />
+                                </svg>
+                            </button>
 
-                                <span className="font-bold text-xs sm:text-sm py-0.5 sm:py-1">{item.quantity}</span>
+                            <span className="font-bold text-sm text-[#1a1a1a] w-6 text-center tabular-nums">{item.quantity}</span>
 
-                                <button
-                                    onClick={() => decreaseQuantity(item.id)}
-                                    className="p-1.5 sm:p-2 hover:bg-gray-50 active:scale-90 transition-all rounded-full text-gray-400 hover:text-red-500"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M18 12H6" />
-                                    </svg>
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => decreaseQuantity(item.id)}
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-white active:scale-90 transition-all shadow-sm text-gray-400 hover:text-red-400"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M18 12H6" />
+                                </svg>
+                            </button>
                         </div>
                     </motion.div>
                 ))}

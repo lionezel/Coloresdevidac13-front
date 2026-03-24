@@ -11,19 +11,19 @@ export default function OrderSuccessPage() {
     const handlePrint = async () => {
         try {
             const lastOrderStr = sessionStorage.getItem("lastOrder");
-            if (!lastOrderStr) return alert("No se encontró información de la última orden.");
-
-            const lastOrder = JSON.parse(lastOrderStr);
-
-            // await sendToKitchen(lastOrder);
-
-            sessionStorage.removeItem("lastOrder");
-            router.push("/");
+            if (lastOrderStr) {
+                // You can do your print job here:
+                // const lastOrder = JSON.parse(lastOrderStr);
+                // await sendToKitchen(lastOrder);
+                sessionStorage.removeItem("lastOrder");
+            }
         } catch (error) {
             console.error("Error al imprimir:", error);
-            alert("No se pudo enviar la comanda a la cocina.");
+            // Non-blocking error for navigation
+        } finally {
+            router.push("/home");
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
