@@ -12,7 +12,7 @@ import { db } from "@/src/firebase/config";
 import { RestaurantId } from "@/src/global/id";
 
 export default function OrdersList() {
-    const { orders, loading } = useOrders();
+    const { orders, loading, error } = useOrders();
     const router = useRouter();
     const { formatPrice } = useFormatPrice();
 
@@ -80,6 +80,23 @@ export default function OrdersList() {
         );
     }
 
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl border-2 border-red-100 shadow-sm mt-8 max-w-2xl mx-auto">
+                <svg className="w-16 h-16 text-red-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 className="text-xl font-bold text-red-800 mb-2 font-[Ubuntu]">Requiere Configuración de Base de Datos</h3>
+                <p className="text-red-600 text-center mb-6 font-medium">
+                    Para mostrar tus órdenes personalizadas, Firestore necesita un índice. Por favor, haz clic en el enlace de la consola de Firebase para habilitarlo.
+                </p>
+                <div className="bg-white p-4 rounded-xl border border-red-200 text-xs font-mono text-red-500 overflow-auto max-w-full">
+                    {error}
+                </div>
+            </div>
+        );
+    }
+
     if (orders.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-gray-100 shadow-sm mt-8">
@@ -100,6 +117,11 @@ export default function OrdersList() {
                     const orderIdentifier = order.mesa ? `Mesa ${order.mesa}` : (order.name || "Sin nombre");
                     const dateStr = order.date?.toDate ? order.date.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Ahora";
                     const isPaid = (order as any).isPaid;
+                    
+                    // Case-insensitive check for state or status
+                    const normalizeStatus = (s: any) => String(s || "").toLowerCase().trim();
+                    const currentState = normalizeStatus(order.state || (order as any).status);
+                    const isReady = currentState === 'listo / caja' || currentState === 'listo';
 
                     return (
                         <motion.div
@@ -118,7 +140,7 @@ export default function OrdersList() {
                                         </svg>
                                         Pagado
                                     </div>
-                                ) : order.state === 'listo / caja' ? (
+                                ) : isReady ? (
                                     <div className="px-4 py-1.5 rounded-full text-xs font-bold shadow-md text-white font-[Ubuntu] bg-green-500 flex items-center gap-1.5">
                                         <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -131,6 +153,9 @@ export default function OrdersList() {
                                     </span>
                                 )}
                             </div>
+
+
+
 
                             <div className="flex justify-between items-start mb-4 mt-2">
                                 <div>

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { CategoryView } from "@/src/features/category/components/category-view";
+import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 
 interface Props {
     params: Promise<{ categoryId: string }>
@@ -11,14 +12,16 @@ export default async function CategoryPage({ params }: Props) {
     const decodedCategoryId = categoryId.replace(/-/g, ' ');
 
     return (
-        <Suspense
-            fallback={
-                <div className="p-8 text-center text-muted-foreground">
-                    Cargando productos...
-                </div>
-            }
-        >
-            <CategoryView slug={decodedCategoryId} />
-        </Suspense>
+        <ProtectedRoute>
+            <Suspense
+                fallback={
+                    <div className="p-8 text-center text-muted-foreground">
+                        Cargando productos...
+                    </div>
+                }
+            >
+                <CategoryView slug={decodedCategoryId} />
+            </Suspense>
+        </ProtectedRoute>
     );
 }

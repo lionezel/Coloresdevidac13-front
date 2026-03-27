@@ -8,6 +8,7 @@ import { useCreditCustomers } from "@/src/features/cart/hooks/useCreditCustomers
 import { useFormatPrice } from "@/src/features/category/hooks/useFormatPrice";
 import { CreditCustomer } from "@/src/features/cart/types/customer";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/context/AuthContext";
 import {
     addDoc,
     collection,
@@ -18,11 +19,13 @@ import {
 } from "firebase/firestore";
 import React, { useMemo, useState, useEffect } from "react";
 
+
 export default function CheckoutSummary() {
     const { cart, loading, clearCart } = useCart();
     const { customers, loading: loadingCustomers } = useCreditCustomers();
     const { formatPrice } = useFormatPrice();
     const router = useRouter();
+    const { user } = useAuth();
 
     console.log("customers", customers);
 
@@ -139,7 +142,11 @@ export default function CheckoutSummary() {
                         products: updatedProducts,
                         subtotal: updatedSubtotal,
                         total: updatedTotal,
+                        state: "en_orden",
+                        waitressId: user?.uid || existingOrder.waitressId || null,
+                        waitressName: user?.email || existingOrder.waitressName || null,
                     });
+
 
                     sessionStorage.removeItem("editingOrderId");
                     sessionStorage.removeItem("editingOrderName");
@@ -160,11 +167,16 @@ export default function CheckoutSummary() {
                 shippingCost,
                 total,
                 isDelivery,
-                date: new Date().toISOString(),
+                date: serverTimestamp(),
                 creditCustomerId: selectedCustomer?.id || null,
                 creditCustomerName: selectedCustomer?.name || null,
-                status: "en_orden",
+                state: "en_orden",
+                waitressId: user?.uid || null,
+                waitressName: user?.email || null,
             };
+
+
+
 
             console.log("ORDEN A GUARDAR:", orderData);
 
