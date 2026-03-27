@@ -20,6 +20,8 @@ export default function CheckoutDialog({
 }: CheckoutDialogProps) {
     const [paymentMethod, setPaymentMethod] = useState<string>("efectivo");
     const [cashReceived, setCashReceived] = useState<number | "">("");
+    const [cashCurrency, setCashCurrency] = useState<"COP" | "USD">("COP");
+    const [usdExchangeRate, setUsdExchangeRate] = useState<number>(4200);
 
     // Plan Guía
     const [isGuiaPlan, setIsGuiaPlan] = useState<boolean>(false);
@@ -108,6 +110,7 @@ export default function CheckoutDialog({
         setTipPercentage(0);
         setTipFixedAmount("");
         setCashReceived("");
+        setCashCurrency("COP");
         setDiscountType("none");
         setDiscountMode("percentage");
         setDiscountValue("");
@@ -116,16 +119,22 @@ export default function CheckoutDialog({
         setSelectedCustomerId("");
     }, [order]);
 
+    // In COP always — if paying in USD, convert to COP first
+    const receivedInCOP = useMemo(() => {
+        if (cashReceived === "") return 0;
+        if (cashCurrency === "USD") return Number(cashReceived) * usdExchangeRate;
+        return Number(cashReceived);
+    }, [cashReceived, cashCurrency, usdExchangeRate]);
+
     const changeToGive = useMemo(() => {
         if (paymentMethod !== "efectivo" || cashReceived === "") return 0;
-        const amount = Number(cashReceived);
-        return amount > totalGeneral ? amount - totalGeneral : 0;
-    }, [cashReceived, totalGeneral, paymentMethod]);
+        return receivedInCOP > totalGeneral ? receivedInCOP - totalGeneral : 0;
+    }, [receivedInCOP, totalGeneral, paymentMethod, cashReceived]);
 
     const isShortOnCash =
         paymentMethod === "efectivo" &&
         cashReceived !== "" &&
-        Number(cashReceived) < totalGeneral;
+        receivedInCOP < totalGeneral;
 
     const componentRef = useRef<HTMLDivElement>(null);
 
@@ -171,7 +180,12 @@ export default function CheckoutDialog({
                 tipPercentage,
                 tipAmount,
                 total: totalGeneral,
-                customer: customerData
+                customer: customerData,
+                // USD payment fields
+                cashCurrency: paymentMethod === "efectivo" ? cashCurrency : null,
+                usdAmount: paymentMethod === "efectivo" && cashCurrency === "USD" && cashReceived !== "" ? Number(cashReceived) : null,
+                changeInCOP: paymentMethod === "efectivo" && changeToGive > 0 ? changeToGive : null,
+                exchangeRate: paymentMethod === "efectivo" && cashCurrency === "USD" ? usdExchangeRate : null,
             };
 
             Object.keys(payload).forEach(key => {
@@ -439,30 +453,93 @@ export default function CheckoutDialog({
                         )}
 
                         {paymentMethod === "efectivo" && (
-                            <div className="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200/50">
-                                <p className="font-black text-amber-700 mb-3 text-sm">CALCULADORA DE CAMBIO</p>
+                            <div className="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200/50 space-y-3">
+                                <p className="font-black text-amber-700 text-sm">CALCULADORA DE CAMBIO</p>
+
+                                {/* Currency Selector */}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => { setCashCurrency("COP"); setCashReceived(""); }}
+                                        className={`flex-1 py-2 text-sm font-black rounded-xl border-2 transition-all ${
+                                            cashCurrency === "COP"
+                                                ? "bg-amber-600 text-white border-amber-600 shadow"
+                                                : "bg-white text-amber-700 border-amber-300 hover:border-amber-500"
+                                        }`}
+                                    >
+                                        🪙 Pesos (COP)
+                                    </button>
+                                    <button
+                                        onClick={() => { setCashCurrency("USD"); setCashReceived(""); }}
+                                        className={`flex-1 py-2 text-sm font-black rounded-xl border-2 transition-all ${
+                                            cashCurrency === "USD"
+                                                ? "bg-green-600 text-white border-green-600 shadow"
+                                                : "bg-white text-green-700 border-green-300 hover:border-green-500"
+                                        }`}
+                                    >
+                                        💵 Dólares (USD)
+                                    </button>
+                                </div>
+
+                                {/* TRM field when USD */}
+                                {cashCurrency === "USD" && (
+                                    <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+                                        <span className="text-xs font-black text-green-700 whitespace-nowrap">TRM del día:</span>
+                                        <span className="text-xs text-green-600">1 USD =</span>
+                                        <input
+                                            type="number"
+                                            value={usdExchangeRate}
+                                            onChange={(e) => {
+                                                const val = Number(e.target.value);
+                                                if (val > 0) setUsdExchangeRate(val);
+                                            }}
+                                            className="flex-1 py-1 px-2 text-sm font-black text-green-800 bg-white border border-green-300 rounded-lg focus:outline-none focus:border-green-500"
+                                        />
+                                        <span className="text-xs font-black text-green-700">COP</span>
+                                    </div>
+                                )}
+
+                                {/* Cash input + Change display */}
                                 <div className="flex gap-4 items-start">
                                     <div className="flex-1">
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
+                                                {cashCurrency === "USD" ? "$" : "$"}
+                                            </span>
                                             <input
                                                 type="number"
-                                                placeholder="Efectivo Recibido"
+                                                placeholder={cashCurrency === "USD" ? "USD recibido" : "COP recibido"}
                                                 value={cashReceived}
                                                 onChange={(e) => setCashReceived(e.target.value ? Number(e.target.value) : "")}
                                                 className={`w-full py-3 pl-8 pr-3 font-black text-gray-800 bg-white border-2 rounded-xl focus:outline-none transition-colors ${isShortOnCash ? 'border-red-400 focus:border-red-500 text-red-600' : 'border-amber-200 focus:border-amber-400'}`}
                                             />
+                                            {cashCurrency === "USD" && (
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-green-600">USD</span>
+                                            )}
                                         </div>
-                                        {isShortOnCash && <p className="text-red-500 text-sm font-bold mt-1 ml-1">Monto insuficiente</p>}
+                                        {cashCurrency === "USD" && cashReceived !== "" && (
+                                            <p className="text-xs text-green-700 font-bold mt-1 ml-1">
+                                                ≈ ${receivedInCOP.toLocaleString()} COP
+                                            </p>
+                                        )}
+                                        {isShortOnCash && (
+                                            <p className="text-red-500 text-sm font-bold mt-1 ml-1">
+                                                Monto insuficiente
+                                            </p>
+                                        )}
                                     </div>
 
-                                    <div className={`px-6 py-3 rounded-xl border-2 text-center min-w-[140px] ${cashReceived ? (isShortOnCash ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200') : 'bg-white border-gray-200'}`}>
+                                    <div className={`px-4 py-3 rounded-xl border-2 text-center min-w-[140px] ${cashReceived ? (isShortOnCash ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200') : 'bg-white border-gray-200'}`}>
                                         <p className={`text-xs font-black mb-1 ${cashReceived ? (isShortOnCash ? 'text-red-500' : 'text-green-600') : 'text-gray-400'}`}>
                                             {isShortOnCash ? "FALTA" : "CAMBIO"}
                                         </p>
                                         <p className={`text-xl font-black ${cashReceived ? (isShortOnCash ? 'text-red-600' : 'text-green-600') : 'text-gray-400'}`}>
-                                            ${isShortOnCash ? (totalGeneral - Number(cashReceived)).toLocaleString() : changeToGive.toLocaleString()}
+                                            ${isShortOnCash
+                                                ? (totalGeneral - receivedInCOP).toLocaleString()
+                                                : changeToGive.toLocaleString()}
                                         </p>
+                                        {cashCurrency === "USD" && cashReceived !== "" && !isShortOnCash && (
+                                            <p className="text-xs font-bold text-green-500 mt-1">en COP</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
