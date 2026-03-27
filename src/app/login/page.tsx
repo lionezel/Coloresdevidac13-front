@@ -65,7 +65,7 @@ export default function LoginPage() {
                         <span className="text-4xl">🍽️</span>
                     </div>
                     <h1 className="text-4xl font-black text-white font-[Ubuntu] tracking-tight">
-                        Colores de Vida
+                        Colores de Vida Mesera
                     </h1>
                     <p className="text-white/70 mt-2 font-medium text-lg">
                         Bienvenida, mesera
