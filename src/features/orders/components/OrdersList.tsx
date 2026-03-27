@@ -2,15 +2,21 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useOrders } from "../hooks/useOrders";
+import { useOrders, OrderWithId } from "../hooks/useOrders";
 import { ColorGlobal } from "@/src/global/colorGlobal";
 import { useFormatPrice } from "@/src/features/category/hooks/useFormatPrice";
-import { OrderWithId } from "../hooks/useOrders";
+import { useState } from "react";
+import CheckoutDialog from "./CheckoutDialog";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { db } from "@/src/firebase/config";
+import { RestaurantId } from "@/src/global/id";
 
 export default function OrdersList() {
     const { orders, loading } = useOrders();
     const router = useRouter();
     const { formatPrice } = useFormatPrice();
+
+    const [checkoutOrder, setCheckoutOrder] = useState<OrderWithId | null>(null);
 
     const handleAddToOrder = (order: OrderWithId) => {
         // Save the order details in sessionStorage to be used during the next checkout
@@ -20,6 +26,45 @@ export default function OrdersList() {
 
         // Redirect to home to let the user add items to the cart
         router.push("/home");
+    };
+
+    const handleCheckoutComplete = async (
+        completedOrder: any,
+        finalPaymentMethod: string,
+        customer?: { id: string; name: string }
+    ) => {
+        try {
+            const orderuccessRef = doc(db, "restaurants", RestaurantId, "orderssuccess", completedOrder.id);
+            const orderRef = doc(db, "restaurants", RestaurantId, "orders", completedOrder.id);
+
+            const payload = {
+                ...completedOrder,
+                paymentMethod: finalPaymentMethod,
+                customer: customer || null,
+                tipAmount: completedOrder.tipAmount || 0,
+                discountAmount: completedOrder.discountAmount || 0,
+                discountType: completedOrder.discountType || null,
+                discountMode: completedOrder.discountMode || null,
+                discountValue: completedOrder.discountValue || null,
+                isGuiaPlan: completedOrder.isGuiaPlan || false,
+                guiaDiscount: completedOrder.guiaDiscount || 0,
+                total: completedOrder.total,
+                state: "listo / caja",
+                isPaid: true,
+                paidAt: new Date()
+            };
+
+            // Guarda la orden en la colección orderssuccess
+            await setDoc(orderuccessRef, payload);
+
+            // Elimina la orden de la colección órdenes activas
+            await deleteDoc(orderRef);
+
+            setCheckoutOrder(null);
+        } catch (error) {
+            console.error("Error updating order upon checkout:", error);
+            alert("Error al finalizar la orden.");
+        }
     };
 
     if (loading) {
@@ -49,6 +94,7 @@ export default function OrdersList() {
                 {orders.map((order, index) => {
                     const orderIdentifier = order.mesa ? `Mesa ${order.mesa}` : (order.name || "Sin nombre");
                     const dateStr = order.date?.toDate ? order.date.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Ahora";
+                    const isPaid = (order as any).isPaid;
 
                     return (
                         <motion.div
@@ -56,11 +102,18 @@ export default function OrdersList() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between relative"
+                            className={`bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between relative ${isPaid ? 'opacity-70' : ''}`}
                         >
                             {/* Status Badge */}
                             <div className="absolute -top-3 -right-3">
-                                {order.state === 'listo / caja' ? (
+                                {isPaid ? (
+                                    <div className="px-4 py-1.5 rounded-full text-xs font-bold shadow-md text-white font-[Ubuntu] bg-emerald-600 flex items-center gap-1.5 border-2 border-white">
+                                        <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                        Pagado
+                                    </div>
+                                ) : order.state === 'listo / caja' ? (
                                     <div className="px-4 py-1.5 rounded-full text-xs font-bold shadow-md text-white font-[Ubuntu] bg-green-500 flex items-center gap-1.5">
                                         <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -108,20 +161,40 @@ export default function OrdersList() {
                                 </ul>
                             </div>
 
-                            <button
-                                onClick={() => handleAddToOrder(order)}
-                                className="w-full py-3 rounded-2xl flex items-center justify-center font-bold text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-md"
-                                style={{ backgroundColor: ColorGlobal }}
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span className="font-[Ubuntu]">Añadir a este pedido</span>
-                            </button>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => handleAddToOrder(order)}
+                                    className="w-full py-3 rounded-2xl flex items-center justify-center font-bold text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-md"
+                                    style={{ backgroundColor: ColorGlobal }}
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span className="font-[Ubuntu]">Añadir a este pedido</span>
+                                </button>
+                                {!isPaid && (
+                                    <button
+                                        onClick={() => setCheckoutOrder(order)}
+                                        className="w-full py-3 rounded-2xl flex items-center justify-center font-bold text-gray-800 bg-emerald-400 hover:bg-emerald-500 transition-all transform hover:scale-[1.02] active:scale-95 shadow-md"
+                                    >
+                                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <span className="font-[Ubuntu]">Facturar y Cobrar</span>
+                                    </button>
+                                )}
+                            </div>
                         </motion.div>
                     );
                 })}
             </div>
+
+            <CheckoutDialog
+                open={!!checkoutOrder}
+                order={checkoutOrder as any}
+                onClose={() => setCheckoutOrder(null)}
+                onComplete={handleCheckoutComplete as any}
+            />
         </div>
     );
 }
