@@ -17,6 +17,11 @@ export default function OrdersList() {
     const { formatPrice } = useFormatPrice();
 
     const [checkoutOrder, setCheckoutOrder] = useState<OrderWithId | null>(null);
+    const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+
+    const toggleExpand = (orderId: string) => {
+        setExpandedOrders(prev => ({ ...prev, [orderId]: !prev[orderId] }));
+    };
 
     const handleAddToOrder = (order: OrderWithId) => {
         // Save the order details in sessionStorage to be used during the next checkout
@@ -153,9 +158,32 @@ export default function OrdersList() {
                                             </span>
                                         </li>
                                     ))}
+                                    {expandedOrders[order.id] && order.products?.slice(3).map((prod, i) => (
+                                        <li key={`extra-${i}`} className="flex justify-between text-sm text-gray-600 font-[Ubuntu] animate-fade-in">
+                                            <span className="truncate pr-4">
+                                                <span className="font-bold mr-1">{prod.quantity}x</span>
+                                                {prod.productName}
+                                            </span>
+                                        </li>
+                                    ))}
                                     {order.products?.length > 3 && (
-                                        <li className="text-xs text-gray-400 font-bold mt-2 font-[Ubuntu]">
-                                            + {order.products.length - 3} productos más
+                                        <li className="mt-2">
+                                            <button
+                                                onClick={() => toggleExpand(order.id)}
+                                                className="text-xs font-bold flex items-center gap-1 transition-colors hover:opacity-80"
+                                                style={{ color: ColorGlobal }}
+                                            >
+                                                <svg
+                                                    className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedOrders[order.id] ? 'rotate-180' : ''}`}
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                                {expandedOrders[order.id]
+                                                    ? "Ocultar productos"
+                                                    : `+ ${order.products.length - 3} productos más`
+                                                }
+                                            </button>
                                         </li>
                                     )}
                                 </ul>
