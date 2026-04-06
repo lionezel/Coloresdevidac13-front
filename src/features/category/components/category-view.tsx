@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useProducts } from "../hooks/useProducts";
@@ -12,14 +12,23 @@ import { useCart } from "../../cart/hooks/useCart";
 import { CartIconWithBadge } from "../../home/components/CartIconWithBadge";
 import { BackgroundColor, ColorGlobal, ColorCoffee } from "../../../global/colorGlobal";
 import { CardBox } from "./card-box";
+import { useCategory } from "../../home/hooks/useCategory";
 
 interface CategoryViewProps {
     slug: string;
 }
 
 export function CategoryView({ slug }: CategoryViewProps) {
-    const { products, loading: productsLoading } = useProducts(slug);
-    const { additions, loading: additionsLoading } = useAdditions(slug);
+    const { category, loading: categoryLoading } = useCategory();
+
+    const exactCategoryName = useMemo(() => {
+        if (!category || category.length === 0) return "";
+        const found = category.find(c => c.name.toLowerCase().replace(/\s+/g, '-') === slug);
+        return found ? found.name : slug.replace(/-/g, ' ');
+    }, [category, slug]);
+
+    const { products, loading: productsLoading } = useProducts(exactCategoryName);
+    const { additions, loading: additionsLoading } = useAdditions(exactCategoryName);
     const { formatPrice } = useFormatPrice();
     const { addToCart } = useCart();
     const { Loading } = useLoading();
